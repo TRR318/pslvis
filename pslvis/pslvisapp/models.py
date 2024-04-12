@@ -9,14 +9,23 @@ class Data(models.Model):
     data_field = models.JSONField(default=list)
 
     @property
-    def data(self):
-        return list(self.df.itertuples(index=False))
+    def features(self):
+        return self.data_field
 
-    @property
-    def df(self):
-        return pd.DataFrame(self.data_field)
+    def insert_feature(self, feature, pos):
+        tmp = self.data_field
+        tmp.insert(pos, feature)
+        self.data_field = tmp
+        self.save()
 
-    @df.setter
-    def df(self, value):
-        self.data_field = list(pd.DataFrame(value).itertuples(index=False))
+    def remove_feature(self, feature):
+        tmp = self.data_field
+        tmp.remove(feature)
+        self.data_field = tmp
+        self.save()
+
+    def move_feature(self, i,k):
+        tmp = self.data_field
+        tmp[i], tmp[k] = tmp[k], tmp[i]
+        self.data_field = tmp
         self.save()

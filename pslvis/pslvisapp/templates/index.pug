@@ -11,40 +11,38 @@ html(lang='en')
   body
     .container.mt-5
       h1 DataFrame from Pandas
-      // Display the DataFrame HTML
-
-      .row.mt-4
-        .col-0.col-md-1.col-xl-2
-        .col
-          include table.pug
-        .col-0.col-md-1.col-xl-2
+      include table.pug
      
     script.
-      function table_handle() {
-        new Sortable(document.querySelector('#data-table'), {
-          animation:150,
-          onEnd: function(evt) {
-            //console.log(evt)
-            const fromIndex = evt.oldIndex;
-            const toIndex = evt.newIndex;
+      function handle_drag() {
+        document.querySelectorAll("#feature-container ul")
+          .forEach(ul => {
+            new Sortable(ul, {
+              animation:150,
+              group: "features",
+              onEnd: function(evt) {
+                console.log(evt)
+                const fromIndex = evt.oldIndex;
+                const toIndex = evt.newIndex;
 
-            if (true  || fromIndex !== toIndex) {
-              // Trigger htmx to send information to the server
-              htmx.ajax("GET", "/update-table", {
-                target: "#data-table",
-                swap: "outerHTML",
-                values: {
-                  from: fromIndex,
-                  to: toIndex,
-                  item: evt.item.innerText,
-                  fromHTML: evt.from.id,
-                  toHTML: evt.target.id,
+                if (true  || fromIndex !== toIndex) {
+                  // Trigger htmx to send information to the server
+                  htmx.ajax("GET", "/update-table", {
+                    target: "#feature-container",
+                    swap: "outerHTML",
+                    values: {
+                      from: fromIndex,
+                      to: toIndex,
+                      feature: evt.item.value,
+                      fromList: evt.from.id,
+                      toList: evt.to.id,
+                    }
+                  });
                 }
-              });
-            }
-          }
-        });
+              }
+            });
+          })
       }
 
-      document.addEventListener('DOMContentLoaded', table_handle);
-      document.body.addEventListener('htmx:afterSwap', table_handle);
+      document.addEventListener('DOMContentLoaded', handle_drag);
+      document.body.addEventListener('htmx:afterSwap', handle_drag);

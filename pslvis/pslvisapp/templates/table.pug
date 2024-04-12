@@ -1,12 +1,20 @@
-ul#data-table.list-group.text-center
-  .fw-bold.list-group-item.d-flex.p-0
-    .col.p-2 Header 1
-    .col.p-2.border-start Header 2
-    .col.p-2.border-start Header 3
-  each row in rows
-    li.list-group-item.list-group-item-action.d-flex.p-0
-      each val, index in row
-        if index == 0
-          .col.p-2= val
-        else
-          .col.p-2.border-start= val
+#feature-container.row.mt-4
+  .col-2
+    ul#unused.list-group.text-center
+      .fw-bold.list-group-item.p-2 Unused
+      each idx, f in var.items
+        li.list-group-item.list-group-item-action.p-2(value=idx)= f
+  .col-10
+    ul#used.list-group.text-center
+      .fw-bold.list-group-item.d-flex.p-0
+        each head in headings
+          .col.p-2= head
+      each rowidx, row in rows.items
+        li.list-group-item.list-group-item-action.d-flex.p-0(value=rowidx)
+          each val in row
+            .col.p-2= val
+script.
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll("*>*>.col:not(:first-child)")
+      .forEach(e => e.classList.add("border-start"))
+  });
