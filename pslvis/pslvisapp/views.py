@@ -1,31 +1,38 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.template.loader import render_to_string
 
+from .models import Data
 
-# Create your views here.
-import pandas as pd
+INITIAL_TABLE_DATA = {
+    "Name": ["Alice", "Bob", "Charlie"],
+    "Age": [25, 30, 35],
+    "Job": ["Engineer", "Doctor", "Artist"],
+}
 
 
 def index(request):
-    # Create a simple DataFrame
-    data = {
-        "Name": ["Alice", "Bob", "Charlie"],
-        "Age": [25, 30, 35],
-        "Job": ["Engineer", "Doctor", "Artist"],
-    }
-    df = pd.DataFrame(data)
+    session_key = request.session.session_key
+    if not session_key:
+        request.session.save()
+        session_key = request.session.session_key
 
-    return render(request, "index.pug",  {'rows': df.itertuples(index=False)})
+    try:
+        user_table = Data.objects.get(session_key=session_key)
+    except Data.DoesNotExist:
+        user_table = Data(session_key=session_key, data_field=INITIAL_TABLE_DATA)
+        user_table.save()
+
+    return render(request, "index.pug", {"rows": user_table.data})
 
 
 def update_table(request):
     print(request.GET)
-    data = {
-        "Namus": ["Alica", "Bobus", "Charlus"],
-        "Agus": [25, 30, 35],
-        "Jobus": ["Engineerus", "Doctorus", "Artistus"],
-    }
-    df = pd.DataFrame(data)
-    
-    return render(request, "table.pug", {'rows': df.itertuples(index=False)})
+    from_ = int(request.GET.get("from")) - 1
+    to_ = int(request.GET.get("to")) - 1
+
+    session_key = request.session.session_key
+
+    user_table = Data.objects.get(session_key=session_key)
+    df = user_table.df
+    df.iloc[from_], df.iloc[to_] = df.iloc[to_].copy(), df.iloc[from_].copy()
+    user_table.df = df
+    return render(request, "table.pug", {"rows": list(df.itertuples(index=False))})

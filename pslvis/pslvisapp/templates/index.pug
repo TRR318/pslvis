@@ -21,12 +21,10 @@ html(lang='en')
      
     script.
       function table_handle() {
-        const table = document.querySelector('#data-table');
-        
-        // Make table rows sortable using SortableJS
-        new Sortable(table, {
+        new Sortable(document.querySelector('#data-table'), {
           animation:150,
           onEnd: function(evt) {
+            //console.log(evt)
             const fromIndex = evt.oldIndex;
             const toIndex = evt.newIndex;
 
@@ -37,7 +35,10 @@ html(lang='en')
                 swap: "outerHTML",
                 values: {
                   from: fromIndex,
-                  to: toIndex
+                  to: toIndex,
+                  item: evt.item.innerText,
+                  fromHTML: evt.from.id,
+                  toHTML: evt.target.id,
                 }
               });
             }
