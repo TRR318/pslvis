@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "responsive-psl"
+version = "0.1.0"
+description = ""
+authors = ["Stefan <stefan.heid@lmu.de>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+django = "^5.0.4"
+django-htmx = "^1.17.3"
+django-tables2 = "^2.7.0"
+scikit-psl = "^0.7.0"
+pypugjs = "^5.9.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
