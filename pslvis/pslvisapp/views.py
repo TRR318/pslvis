@@ -16,12 +16,7 @@ def index(request):
     }
     df = pd.DataFrame(data)
 
-    # Convert DataFrame to HTML
-    html = df.to_html(index=False, table_id="data-table", classes=["table", "table-hover"])
-
-    # Pass the HTML to the template
-    context = {"loaded_data": html}
-    return render(request, "index.pug", context)
+    return render(request, "index.pug",  {'rows': df.itertuples(index=False)})
 
 
 def update_table(request):
@@ -32,8 +27,5 @@ def update_table(request):
         "Jobus": ["Engineerus", "Doctorus", "Artistus"],
     }
     df = pd.DataFrame(data)
-
-    # Convert DataFrame to HTML
-    html = df.to_html(index=False, table_id="data-table", classes=["table", "table-hover"])
-
-    return HttpResponse(html)
+    
+    return render(request, "table.pug", {'rows': df.itertuples(index=False)})

@@ -1,0 +1,12 @@
+ul#data-table.border.text-center.rounded-0.container
+  li.fw-bold.row.list
+    .p-2.col.border-end Header 1
+    .p-2.col.border-end Header 2
+    .p-2.col Header 3
+  each row in rows
+    li.row.border-top
+      each val, index in row
+        if index == 0
+          .p-2.col= val
+        else
+          .p-2.col.border-start= val
