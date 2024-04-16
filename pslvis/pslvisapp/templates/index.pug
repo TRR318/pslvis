@@ -6,33 +6,33 @@ html(lang='en')
     title DataFrame Display
     // Include Bootstrap CSS from CDN
     link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet')
-    script(src="https://unpkg.com/htmx.org@1.8.1/dist/htmx.js")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
+    script(src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.11/dist/htmx.min.js")
     script(src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js")
   body
-    .container.mt-5
-      h1 DataFrame from Pandas
-      include table.pug
-     
+    include pslresult.pug
+
     script.
-      function handle_drag() {
+      function initialize() {
         document.querySelectorAll("#feature-container ul")
           .forEach(ul => {
             new Sortable(ul, {
               animation:150,
               group: "features",
+              ghostClass: "ghost",	
+              handle: ".draghandle",
               onEnd: function(evt) {
-                console.log(evt)
-                const fromIndex = evt.oldIndex;
-                const toIndex = evt.newIndex;
-
-                if (true  || fromIndex !== toIndex) {
+                if (evt.oldIndex !== evt.newIndex || evt.from.id !== evt.to.id) {
                   // Trigger htmx to send information to the server
+                  evt.item.classList.add("ghost")
                   htmx.ajax("GET", "/update-table", {
                     target: "#feature-container",
                     swap: "outerHTML",
                     values: {
-                      from: fromIndex,
-                      to: toIndex,
+                      type: "feature",
+                      from: evt.oldIndex,
+                      to: evt.newIndex,
                       feature: evt.item.value,
                       fromList: evt.from.id,
                       toList: evt.to.id,
@@ -44,5 +44,5 @@ html(lang='en')
           })
       }
 
-      document.addEventListener('DOMContentLoaded', handle_drag);
-      document.body.addEventListener('htmx:afterSwap', handle_drag);
+      document.addEventListener('DOMContentLoaded', initialize);
+      document.body.addEventListener('htmx:afterSwap', initialize);

@@ -1,0 +1,113 @@
+#feature-container.container.mt-5
+  .row 
+    .col-6.col-lg-4
+      h1 Interactive PSL
+      p  You can drag and drop features from left to right and observe how the performance changes
+    .col-6.offset-lg-4.col-lg-4
+      canvas#chart(max-height="200px")
+  .row.mt-4
+    .col-2
+      ul#unused.list-group.text-center
+        .fw-bold.list-group-item.p-2 Unused
+        each idx, f in var.items
+          li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle(value=idx)= f
+    .col-10
+      ul#used.list-group.text-center
+        .fw-bold.list-group-item.d-flex.p-0
+          each head, i in headings
+              if i < 1
+                .cell.col-3.p-2.text-truncate= head
+              else 
+                .cell.col.p-2.text-truncate= head
+        each rowidx, row in rows.items
+          li.list-group-item.list-group-item-action.d-flex.p-0(value=rowidx)
+            each val, i in row
+              if i < 1
+                .cell.label.col.col-3.p-2.text-truncate.draghandle= val
+              if i == 1
+                .cell.col.p-2.text-truncate.d-flex.justify-content-around.align-items-center
+                  span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.decr(value=rowidx) remove
+                  = val
+                  span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.incr(value=rowidx) add
+              if i > 1 
+                .cell.col.p-2.text-truncate= val
+  style.
+    .ghost :not(.label){
+      display: none !important;
+    }
+  script.
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+          mutation.target.querySelectorAll(".cell.label").forEach(elem => {
+          if (mutation.target.classList.contains('ghost')) {
+            elem.classList.remove("col-3");
+          } else {
+            elem.classList.add("col-3");
+          }
+        });
+      });
+    });
+
+    document.querySelectorAll('li')
+      .forEach(elem => {observer.observe(elem, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    });
+
+    document.querySelectorAll("#used .incr")
+      .forEach(e => {
+        e.onclick = e => {
+          htmx.ajax("GET", "/update-table", {
+            target: "#feature-container",
+            swap: "outerHTML",
+            values: {
+              type: "score",
+              feature: e.value,
+              score_change: 1
+            }
+          });
+        }
+      });
+
+    document.querySelectorAll("#used .decr")
+      .forEach(e => {
+        e.onclick = e => {
+          htmx.ajax("GET", "/update-table", {
+            target: "#feature-container",
+            swap: "outerHTML",
+            values: {
+              type: "score",
+              feature: e.value,
+              score_change: -1
+            }
+          });
+        }
+      });
+
+
+    document.querySelectorAll("#used .cell:not(:first-child)")
+      .forEach(e => e.classList.add("border-start"))
+    new Chart(document.querySelector("#chart").getContext('2d'), {
+      type: "line",
+      data: {
+        labels: !{labels},
+          datasets: [{
+          label: 'Brier score per stage',
+          data: !{data},
+          borderColor: 'rgb(75, 192, 192)' 
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            min: 0,     // Set the minimum value of the y-axis
+            max: 1.02,   // Set the maximum value of the y-axis
+          }
+        },
+        animation: {
+          duration: 0
+        }
+      }
+    });
