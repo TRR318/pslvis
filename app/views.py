@@ -15,10 +15,10 @@ def index(request):
     try:
         user_table = Data.objects.get(session_key=session_key)
     except Data.DoesNotExist:
-        user_table = Data(session_key=session_key, data_field=[])
+        user_table = Data(session_key=session_key, data_field=dict(features=[], scores={}))
         user_table.save()
 
-    return render(request, "index.pug", fit_psl(user_table.features))
+    return render(request, "index.pug", fit_psl(user_table.features, user_table.scores))
 
 
 def update_table(request):
@@ -28,7 +28,7 @@ def update_table(request):
     table = Data.objects.get(session_key=session_key)
 
 
-    feature = int(request.GET.get("feature"))
+    feature_index = int(request.GET.get("feature"))
     match request.GET.get("type"):
         case "feature":
             from_ = int(request.GET.get("from")) - 1
@@ -37,16 +37,16 @@ def update_table(request):
             tolist = request.GET.get("toList")
 
             if fromlist == "unused" and tolist == "used":
-                table.insert_feature(feature, to_)
+                table.insert_feature(feature_index, to_)
             elif fromlist == "used" and tolist == "unused":
-                table.remove_feature(feature)
+                table.remove_feature(feature_index)
             elif fromlist == tolist == "used":
                 table.move_feature(from_, to_)
         case "score":
-            score = int(request.GET.get("score"))
+            diff = int(request.GET.get("diff"))
+            table.update_score(feature_index, diff=diff)
 
-
-    return render(request, "pslresult.pug", fit_psl(table.features))
+    return render(request, "pslresult.pug", fit_psl(table.features, table.scores))
 
 
 class Dataset:
@@ -59,11 +59,12 @@ class Dataset:
         return self.X, self.y
 
 
-def fit_psl(features=None):
+def fit_psl(features=None, scores=None):
     X, y = Dataset()()
 
     psl = ProbabilisticScoringList({1})
-    psl.fit(X, y, predef_features=features, k="predef")
+    scores = [scores[f] for f in features]
+    psl.fit(X, y, predef_features=features, predef_scores=scores, k="predef")
     f = [
         "Age (years)",
         "BMI (kg/m2)",

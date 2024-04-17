@@ -9,7 +9,7 @@
             "name": "Django",
             "type": "debugpy",
             "request": "launch",
-            "program": "pslvis/manage.py",
+            "program": "manage.py",
             "console": "integratedTerminal",
             "args": ["runserver"]
         }
