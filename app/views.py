@@ -6,7 +6,7 @@ from skpsl import ProbabilisticScoringList
 import numpy as np
 import pandas as pd
 from sklearn.datasets import fetch_openml
-import os
+from sklearn.metrics import balanced_accuracy_score
 
 
 def index(request):
@@ -34,16 +34,17 @@ def update_table(request):
     match request.GET.get("type"):
         case "feature":
             feature_index = int(request.GET.get("feature"))
-            from_ = int(request.GET.get("from")) - 1
-            to_ = int(request.GET.get("to")) - 1
             fromlist = request.GET.get("fromList")
             tolist = request.GET.get("toList")
 
-            if fromlist == "unused" and tolist == "used":
-                table.insert_feature(feature_index, to_)
-            elif fromlist == "used" and tolist == "unused":
+            if fromlist == "used" and tolist == "unused":
                 table.remove_feature(feature_index)
+            elif fromlist == "unused" and tolist == "used":
+                to_ = int(request.GET.get("to")) - 1
+                table.insert_feature(feature_index, to_)
             elif fromlist == tolist == "used":
+                from_ = int(request.GET.get("from")) - 1
+                to_ = int(request.GET.get("to")) - 1
                 table.move_feature(from_, to_)
             result = fit_psl(table.features, table.scores)
         case "score":
@@ -126,7 +127,7 @@ def fit_psl(features=None, scores=None, k="predef"):
         row_idx: [substitute(k, e) for k, e in enumerate(v[2:])]
         for row_idx, v in zip(features, list(df.itertuples(index=False))[1:])
     }
-    labels, data = list(zip(*enumerate((stage.score(X, y) for stage in psl))))
+    labels, data = list(zip(*enumerate((balanced_accuracy_score(y, stage.predict(X), adjusted=True) for stage in psl))))
     labels = list(labels)
     data = list(data)
     headings =list(df.columns[2:4]) +[s[4:] for s in df.columns[4:]]
