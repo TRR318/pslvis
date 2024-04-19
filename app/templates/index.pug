@@ -31,7 +31,18 @@ html(lang='en')
           span= " Visualization repo"
 
     script.
+      function loadStart(){
+        document.querySelectorAll("#feature-container .loading").forEach(e => {
+          e.classList.add("opacity-25");
+          e.style.pointerEvents = "none";
+          e.style.userSelect = "none";
+        });
+        document.querySelectorAll("#feature-container .spinner-border")
+          .forEach(e => e.classList.remove("d-none"));
+      }
+
       function reset(){
+        loadStart();
         htmx.ajax("GET", "/update-table", {
                     target: "#feature-container",
                     swap: "outerHTML",
@@ -41,6 +52,7 @@ html(lang='en')
                   });
       }
       function fill(){
+        loadStart();
         htmx.ajax("GET", "/update-table", {
                     target: "#feature-container",
                     swap: "outerHTML",
@@ -62,6 +74,7 @@ html(lang='en')
                 if (evt.oldIndex !== evt.newIndex || evt.from.id !== evt.to.id) {
                   // Trigger htmx to send information to the server
                   evt.item.classList.add("ghost")
+                  loadStart();
                   htmx.ajax("GET", "/update-table", {
                     target: "#feature-container",
                     swap: "outerHTML",
