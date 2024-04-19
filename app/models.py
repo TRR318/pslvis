@@ -26,12 +26,12 @@ class Data(models.Model):
         self.data_field["scores"] = value
         self.save()
 
-    def insert_feature(self, feature, pos):
+    def insert_feature(self, feature, pos=None, score=1):
         tmp = self.features
-        tmp.insert(pos, feature)
+        tmp.insert(len(tmp) if pos is None else pos, feature)
         self.features = tmp
         tmp = self.scores
-        tmp[feature] = 1
+        tmp[feature] = int(score)
         self.scores = tmp
 
     def remove_feature(self, feature):
@@ -56,3 +56,6 @@ class Data(models.Model):
             tmp[index] = tmp[index] + diff
 
         self.scores = tmp
+    def reset(self):
+        self.data_field=dict(features=[], scores={})
+        self.save()

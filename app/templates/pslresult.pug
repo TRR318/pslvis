@@ -2,15 +2,17 @@
   .row 
     .col-sm-6.col-lg-4
       h1 Interactive PSL
-      p  You can drag and drop features from left to right and observe how the performance changes
+      p You can drag and drop features from left to right and observe how the performance changes
+      //p Predict the presence of breast cancer. Which features would be most influencial?
+      p Predict whether a student is likely to drop out of university. Which features would be most influencial?
     .col-sm-6.offset-lg-4.col-lg-4
       canvas#chart(height="180px")
   .row.mt-4
     .col-2
       ul#unused.list-group.text-center
         .fw-bold.list-group-item.p-2 Unused
-        each idx, f in var.items
-          li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle(data-feature=idx)= f
+        each fidx, f in var.items
+          li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle(data-feature=fidx)= f
     .col-10
       ul#used.list-group.text-center
         .fw-bold.list-group-item.d-flex.p-0
@@ -21,18 +23,18 @@
                 .cell.col-1.p-2.text-truncate= head
               if i > 1
                 .cell.col.p-2.text-truncate= head
-        each rowidx, row in rows.items
-          li.list-group-item.list-group-item-action.d-flex.p-0(data-feature=rowidx)
+        each fidx, row in rows.items
+          li.list-group-item.list-group-item-action.d-flex.p-0(data-feature=fidx)
             each val, i in row
               if i == 0
                 .cell.label.col.col-3.p-2.text-truncate.draghandle= val
               if i == 1
                 .cell.col.col-1.p-2.text-truncate.d-flex.justify-content-around.align-items-center
-                  span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.decr(data-feature=rowidx) remove
+                  span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.decr(data-feature=fidx) remove
                   = val
-                  span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.incr(data-feature=rowidx) add
+                  span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.incr(data-feature=fidx) add
               if i > 1 
-                .cell.col.p-2.text-truncate= val
+                .cell.col.pt-2.pb-2.text-truncate= val
   style.
     .ghost :not(.label){
       display: none !important;
@@ -104,8 +106,8 @@
       options: {
         scales: {
           y: {
-            beginAtZero: true,
-            min: 0,     // Set the minimum value of the y-axis
+           // beginAtZero: true,
+            //min: 0,     // Set the minimum value of the y-axis
             max: 1.02,   // Set the maximum value of the y-axis
           }
         },

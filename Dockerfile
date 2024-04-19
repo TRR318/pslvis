@@ -33,4 +33,4 @@ COPY . .
 # Make portdo 8000 available to the world outside this container
 EXPOSE 8000
 # Run the app. CMD can be overridden by providing a different command in the Docker run command
-CMD ["gunicorn", "pslvis.wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "pslvis.wsgi"]

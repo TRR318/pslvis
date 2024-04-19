@@ -12,6 +12,6 @@
             "program": "manage.py",
             "console": "integratedTerminal",
             "args": ["runserver"]
-        }
+        },
     ]
 }

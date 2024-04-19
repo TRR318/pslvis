@@ -1,9 +1,12 @@
+from pathlib import Path
 from django.shortcuts import render
 
 from .models import Data
 from skpsl import ProbabilisticScoringList
 import numpy as np
+import pandas as pd
 from sklearn.datasets import fetch_openml
+import os
 
 
 def index(request):
@@ -26,11 +29,11 @@ def update_table(request):
 
     session_key = request.session.session_key
     table = Data.objects.get(session_key=session_key)
+    psl_length= "predef"
 
-
-    feature_index = int(request.GET.get("feature"))
     match request.GET.get("type"):
         case "feature":
+            feature_index = int(request.GET.get("feature"))
             from_ = int(request.GET.get("from")) - 1
             to_ = int(request.GET.get("to")) - 1
             fromlist = request.GET.get("fromList")
@@ -42,40 +45,69 @@ def update_table(request):
                 table.remove_feature(feature_index)
             elif fromlist == tolist == "used":
                 table.move_feature(from_, to_)
+            result = fit_psl(table.features, table.scores)
         case "score":
+            feature_index = int(request.GET.get("feature"))
             diff = int(request.GET.get("diff"))
             table.update_score(feature_index, diff=diff)
+            result = fit_psl(table.features, table.scores)
+        case "reset":
+            table.reset()
+            result = fit_psl(table.features, table.scores)
+        case "fill":
+            result = fit_psl(table.features, table.scores, None)
+            
+            table.reset()
+            for f,s in zip(result["features"], result["scores"]):
+                table.insert_feature(f,None,s)
+            
+            result = fit_psl(table.features, table.scores)
 
-    return render(request, "pslresult.pug", fit_psl(table.features, table.scores))
+
+    return render(request, "pslresult.pug", result)
 
 
 class Dataset:
-    X, y = None, None
+    X, y, f = None, None, None
 
     def __call__(self):
-        if self.X is None:
-            self.X, y = fetch_openml(data_id=42900, return_X_y=True, as_frame=False)
-            self.y = np.array(y == 2, dtype=int)
-        return self.X, self.y
+        if Dataset.X is None:
+            p = Path("data/schüler.csv")
+            if p.is_file():
+                df = pd.read_csv(p.absolute())
+                target = 'dropout'
+                all_features = ['age_enroll', 'migrant','Gesamtnote Abschlusszeugnis', 'Big Five: Gewissenhaftigkeit', 'Big Five: Verträglichkeit',
+                    'Big Five: Extraversion', 'Big Five: Offenheit/Intellekt',
+                    'Big Five: Neurotizismus',                    'fernstudium',
+                    'berufsbegleitendes Studium','study_Ing', 'study_ReWiSo',
+                     'male',                     'study_SprKult',                    'study_Sport',  'study_MatNat', 'study_MedGesund',                    'study_agrar', 'study_Kunst']
+                #'gymnasium', 'mathe_leistungskurs','dualer Studiengang',
+                Dataset.X,y = df[all_features],df[target]
+                Dataset.y = np.array(y == 1, dtype=int)
+                Dataset.f = all_features
+            else:
+                Dataset.X, y = fetch_openml(data_id=42900, return_X_y=True, as_frame=False)
+                Dataset.y = np.array(y == 2, dtype=int)
+                Dataset.f = [
+                    "Age (years)",
+                    "BMI (kg/m2)",
+                    "Glucose (mg/dL)",
+                    "Insulin (microgram/mL)",
+                    "HOMA",
+                    "Leptin (ng/mL)",
+                    "Adiponectin (microg/mL)",
+                    "Resistin (ng/mL)",
+                    "MCP-1 (pg/dL)",
+                ]
+        return Dataset.X, Dataset.y, Dataset.f
 
 
-def fit_psl(features=None, scores=None):
-    X, y = Dataset()()
+def fit_psl(features=None, scores=None, k="predef"):
+    X, y, f = Dataset()()
 
     psl = ProbabilisticScoringList({1})
-    scores = [scores[f] for f in features]
-    psl.fit(X, y, predef_features=features, predef_scores=scores, k="predef")
-    f = [
-        "Age (years)",
-        "BMI (kg/m2)",
-        "Glucose (mg/dL)",
-        "Insulin (microgram/mL)",
-        "HOMA",
-        "Leptin (ng/mL)",
-        "Adiponectin (microg/mL)",
-        "Resistin (ng/mL)",
-        "MCP-1 (pg/dL)",
-    ]
+    scores = [scores[f_] for f_ in features]
+    psl.fit(X, y, predef_features=features, predef_scores=scores, k=k)
     df = psl.inspect(feature_names=f)
     features = features or []
     unused = {i: v for i, v in enumerate(f) if i not in features}
@@ -97,6 +129,7 @@ def fit_psl(features=None, scores=None):
     labels, data = list(zip(*enumerate((stage.score(X, y) for stage in psl))))
     labels = list(labels)
     data = list(data)
+    headings =list(df.columns[2:4]) +[s[4:] for s in df.columns[4:]]
     return dict(
-        var=unused, headings=list(df.columns[2:]), rows=table, labels=labels, data=data
+        var=unused, headings=headings, rows=table, labels=labels, data=data, features=psl.features, scores=psl.scores
     )
