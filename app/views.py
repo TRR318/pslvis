@@ -18,7 +18,9 @@ def index(request):
     try:
         user_table = Data.objects.get(session_key=session_key)
     except Data.DoesNotExist:
-        user_table = Data(session_key=session_key, data_field=dict(features=[], scores={}))
+        user_table = Data(
+            session_key=session_key, data_field=dict(features=[], scores={})
+        )
         user_table.save()
 
     return render(request, "index.pug", fit_psl(user_table.features, user_table.scores))
@@ -29,7 +31,6 @@ def update_table(request):
 
     session_key = request.session.session_key
     table = Data.objects.get(session_key=session_key)
-    psl_length= "predef"
 
     match request.GET.get("type"):
         case "feature":
@@ -40,7 +41,8 @@ def update_table(request):
             if fromlist == "used" and tolist == "unused":
                 table.remove_feature(feature_index)
             elif fromlist == "unused" and tolist == "used":
-                to_ = int(request.GET.get("to")) - 1
+                to_ = request.GET.get("to", None)
+                to_ = None if to_ is None else int(to_) - 1
                 table.insert_feature(feature_index, to_)
             elif fromlist == tolist == "used":
                 from_ = int(request.GET.get("from")) - 1
@@ -57,13 +59,12 @@ def update_table(request):
             result = fit_psl(table.features, table.scores)
         case "fill":
             result = fit_psl(table.features, table.scores, None)
-            
-            table.reset()
-            for f,s in zip(result["features"], result["scores"]):
-                table.insert_feature(f,None,s)
-            
-            result = fit_psl(table.features, table.scores)
 
+            table.reset()
+            for f, s in zip(result["features"], result["scores"]):
+                table.insert_feature(f, None, s)
+
+            result = fit_psl(table.features, table.scores)
 
     return render(request, "pslresult.pug", result)
 
@@ -76,18 +77,36 @@ class Dataset:
             p = Path("data/schüler.csv")
             if p.is_file():
                 df = pd.read_csv(p.absolute())
-                target = 'dropout'
-                all_features = ['age_enroll', 'migrant','Gesamtnote Abschlusszeugnis', 'Big Five: Gewissenhaftigkeit', 'Big Five: Verträglichkeit',
-                    'Big Five: Extraversion', 'Big Five: Offenheit/Intellekt',
-                    'Big Five: Neurotizismus',                    'fernstudium',
-                    'berufsbegleitendes Studium','study_Ing', 'study_ReWiSo',
-                     'male',                     'study_SprKult',                    'study_Sport',  'study_MatNat', 'study_MedGesund',                    'study_agrar', 'study_Kunst']
+                target = "dropout"
+                all_features = [
+                    "age_enroll",
+                    "migrant",
+                    "Gesamtnote Abschlusszeugnis",
+                    "Big Five: Gewissenhaftigkeit",
+                    "Big Five: Verträglichkeit",
+                    "Big Five: Extraversion",
+                    "Big Five: Offenheit/Intellekt",
+                    "Big Five: Neurotizismus",
+                    "fernstudium",
+                    "berufsbegleitendes Studium",
+                    "study_Ing",
+                    "study_ReWiSo",
+                    "male",
+                    "study_SprKult",
+                    "study_Sport",
+                    "study_MatNat",
+                    "study_MedGesund",
+                    "study_agrar",
+                    "study_Kunst",
+                ]
                 #'gymnasium', 'mathe_leistungskurs','dualer Studiengang',
-                Dataset.X,y = df[all_features],df[target]
+                Dataset.X, y = df[all_features], df[target]
                 Dataset.y = np.array(y == 1, dtype=int)
                 Dataset.f = all_features
             else:
-                Dataset.X, y = fetch_openml(data_id=42900, return_X_y=True, as_frame=False)
+                Dataset.X, y = fetch_openml(
+                    data_id=42900, return_X_y=True, as_frame=False
+                )
                 Dataset.y = np.array(y == 2, dtype=int)
                 Dataset.f = [
                     "Age (years)",
@@ -110,27 +129,43 @@ def fit_psl(features=None, scores=None, k="predef"):
     scores = [scores[f_] for f_ in features]
     psl.fit(X, y, predef_features=features, predef_scores=scores, k=k)
     df = psl.inspect(feature_names=f)
+
     features = features or []
     unused = {i: v for i, v in enumerate(f) if i not in features}
 
-    def substitute(idx, v):
-        if idx == 0:
-            return v
-        elif idx == 1:  # score
-            return f"{v:.0f}"
-        elif np.isnan(v):
-            return ""
-        else:
-            return f"{v:.0%}"
+    if "Feature" not in df:
+        df["Feature"] = np.nan
+    if "Threshold" not in df:
+        df["Threshold"] = np.nan
 
-    table = {
-        row_idx: [substitute(k, e) for k, e in enumerate(v[2:])]
-        for row_idx, v in zip(features, list(df.itertuples(index=False))[1:])
-    }
-    labels, data = list(zip(*enumerate((balanced_accuracy_score(y, stage.predict(X), adjusted=True) for stage in psl))))
-    labels = list(labels)
-    data = list(data)
-    headings =list(df.columns[2:4]) +[s[4:] for s in df.columns[4:]]
+    
+    table = pd.DataFrame(
+        dict(
+            # calculate feature index
+            fidx=psl.inspect()["Feature Index"].map(
+                lambda v: "" if np.isnan(v) else f"{v:.0f}"
+            ),
+            fname=df["Feature"].fillna(""),
+            # remove last two digits of the 4 decimal places in thre threshold
+            thresh=df["Threshold"].fillna("").map(lambda v: v[:-2]),
+            # convert score to integer
+            score=df["Score"].map(lambda v: "" if np.isnan(v) else f"{v:.0f}"),
+            probas=pd.Series(
+                df[[col for col in df.columns if col.startswith("T = ")]]
+                .map(lambda v: "" if np.isnan(v) else f"{v:.0%}")
+                .agg(list, axis=1),
+                name="Probas",
+            ),
+        )
+    ).to_dict("records")[1:] # drop stage 0 and convert into list of dicts
+
+    
     return dict(
-        var=unused, headings=headings, rows=table, labels=labels, data=data, features=psl.features, scores=psl.scores
+        var=unused,
+        headings= [col[4:] for col in df.columns if col.startswith("T = ")],
+        rows=table,
+        labels=list(range(len(psl))),
+        metric=[balanced_accuracy_score(y, stage.predict(X), adjusted=True) for  stage in  psl],
+        features=psl.features,
+        scores=psl.scores,
     )

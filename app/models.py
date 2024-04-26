@@ -55,7 +55,7 @@ class Data(models.Model):
         if diff:
             tmp[index] = tmp[index] + diff
 
-        self.scores = tmp
+        self.scores = tmp   
     def reset(self):
         self.data_field=dict(features=[], scores={})
         self.save()
