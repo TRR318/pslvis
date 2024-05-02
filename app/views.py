@@ -23,12 +23,15 @@ def index(request):
         )
         user_table.save()
 
-    return render(request, "index.pug", fit_psl(user_table.features, user_table.scores))
+    response = render(request, "index.pug", fit_psl(user_table.features, user_table.scores))
+    response["X-Frame-Options"] = "SAMEORIGIN"
+    response["Content-Security-Policy"] = "frame-ancestors 'self' http://127.0.0.1:8000"
+    response["Set-Cookie"] = f"sessionid={session_key}; SameSite=None; Secure"
+    return response
 
 
 def update_table(request):
     print(request.GET)
-
     session_key = request.session.session_key
     table = Data.objects.get(session_key=session_key)
 
@@ -65,9 +68,14 @@ def update_table(request):
                 table.insert_feature(f, None, s)
 
             result = fit_psl(table.features, table.scores)
+    
+    response = render(request, "pslresult.pug", result)
 
-    return render(request, "pslresult.pug", result)
+    response["X-Frame-Options"] = "SAMEORIGIN"
+    response["Content-Security-Policy"] = "frame-ancestors 'self' http://127.0.0.1:8000"
+    response["Set-Cookie"] = f"sessionid={session_key}; SameSite=None; Secure"
 
+    return response
 
 class Dataset:
     X, y, f = None, None, None
