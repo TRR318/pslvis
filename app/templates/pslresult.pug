@@ -1,19 +1,52 @@
+#offcanvasExample.offcanvas.offcanvas-end(tabindex="-1")
+  .offcanvas-header
+    h5.offcanvas-title History
+  .offcanvas-body
+    ul.list-group
+      li.list-group-item.list-group-item-action v1.1
+      li.list-group-item.list-group-item-action v0.6
+      li.list-group-item.list-group-item-action v0.5
+      li.list-group-item.list-group-item-action v0.4
+      li.list-group-item.list-group-item-action v0.3
+      li.list-group-item.list-group-item-action v0.1
+
 #feature-container.container.mt-5
   .row
     .col-sm-6.col-lg-4
-      h1 Interactive PSL
+      h4 Interactive PSL
       p You can drag and drop features from left to right and observe how the performance changes
       //p Predict the presence of breast cancer. Which features would be most influencial?
       p Predict whether a student is likely to drop out of university. Which features would be most influencial?
     .col-sm-6.offset-lg-4.col-lg-4
       canvas#chart.loading(height="180px")
+
   .row.mt-4.loading
+    .col-2.d-flex.justify-content-end
+      #reset.btn.btn-outline-secondary(onclick="reset()")
+        span.mdi.mdi-page-first Reset
+    .col-4.justify-content-center
+      .btn-group(role="group")
+        #add.btn.btn-outline-secondary.rounded-start-2(onclick="add()" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add one optimal feature") Add
+          span.mdi.mdi-chevron-right
+        #fill.btn.btn-outline-secondary(onclick="fill()") Fill
+          span.mdi.mdi-page-last
+    .col-6.d-flex.justify-content-end
+      .btn-group(role="group")
+        #save.btn.btn-outline-secondary= "Save "
+          span.mdi.mdi-content-save
+        input#filename.form-control.d-none.rounded-end-0(type="text" placeholder="Save name")
+        #save-confirm.btn.btn-outline-primary.d-none Confirm
+        button.btn.btn-outline-secondary.flex-shrink-0(data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample")= "History "
+          span.mdi.mdi-history
+          span.badge.text-bg-secondary.rounded-pill.position-absolute.top-0.start-100.translate-middle 400
+
+  .row.mt-3.loading
     .col-2
       ul#unused.list-group.text-center
         .fw-bold.list-group-item.p-2 Unused
         each fidx, f in var.items
-          li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle(data-feature=fidx)= f
-            span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.position-absolute.end-0.add.d-none add
+          li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle(data-feature=fidx data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=f)= f
+            span.mdi.mdi-plus.btn.btn-sm.p-0.position-absolute.end-0.add.d-none
     .col-10
       ul#used.list-group.text-center
         .fw-bold.list-group-item.d-flex.p-0
@@ -24,18 +57,23 @@
         each row in rows
           li.list-group-item.list-group-item-action.d-flex.p-0(data-feature=row["fidx"] data-threshold=row["thresh"])
             // we could also add additional data into the datafield. such as the threshold
-            .cell.label.col.col-3.p-2.text-truncate.draghandle.position-relative= row.fname
-                  if row.thresh != ""
-                    = row.thresh
-                  span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none close
+            .cell.label.col.col-3.p-2.text-truncate.draghandle.position-relative(data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=row["fname"]+row["thresh"])= row.fname
+              if row.thresh != ""
+                = row.thresh
+              span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none
             .cell.col.col-1.p-2.text-truncate.d-flex.justify-content-around.align-items-center
-              span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.decr remove
+              span.mdi.mdi-minus.btn.btn-sm.p-0.decr
               = row.score
-              span.material-symbols-outlined.fs-5.btn.btn-sm.p-0.incr add
+              span.mdi.mdi-plus.btn.btn-sm.p-0.incr
             each val in row.probas
               .cell.col.pt-2.pb-2.text-truncate= val 
   
   .position-fixed.top-50.start-50.spinner-border.d-none
+
+
+
+
+
   style.
     .ghost :not(.label){
       display: none !important;
@@ -43,7 +81,44 @@
     li:hover .add, li:hover .remove{
       display: inline-block !important;
     }
+
+
+
+
+
   script.
+    // fix to delete orphaned tooltips
+    document.querySelectorAll(".tooltip.bs-tooltip-auto").forEach(e => e.remove())
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tr => new bootstrap.Tooltip(tr))
+    
+    var saveButton = document.getElementById('save');
+    var filenameInput = document.getElementById('filename');
+    var saveConfirmButton = document.getElementById('save-confirm');
+
+    saveButton.addEventListener('click', function() {
+      filenameInput.classList.remove("d-none")
+      saveConfirmButton.classList.remove("d-none")
+      saveButton.classList.add("d-none")
+      filenameInput.focus();
+    });
+
+    function saveHistory(){
+      const fileName = filenameInput.value.trim();
+      filenameInput.value = '';
+      filenameInput.classList.add("d-none")
+      saveConfirmButton.classList.add("d-none")
+      saveButton.classList.remove("d-none")
+    }
+
+    filenameInput.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent the default action to avoid form submission or any other unintended effects
+        saveHistory();
+      }
+    });
+    saveConfirmButton.addEventListener('click', saveHistory);      
+
+
     var observer = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
           mutation.target.querySelectorAll(".cell.label").forEach(elem => {
@@ -136,7 +211,7 @@
       data: {
         labels: !{labels},
         datasets: [{
-          label: '(Adj.) Balanced Accuracy per stage',
+          label: 'ROC area under curve per stage',
           data: !{metric},
           borderColor: 'rgb(75, 192, 192)' 
         }]
@@ -144,7 +219,7 @@
       options: {
         scales: {
           y: {
-            beginAtZero: true,
+            beginAtZero: false,
             max: 1.02,   // Set the maximum value of the y-axis
           }
         },

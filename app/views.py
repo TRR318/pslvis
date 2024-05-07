@@ -6,7 +6,7 @@ from skpsl import ProbabilisticScoringList
 import numpy as np
 import pandas as pd
 from sklearn.datasets import fetch_openml
-from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import roc_auc_score
 
 
 def index(request):
@@ -57,6 +57,9 @@ def update_table(request):
         case "reset":
             table.reset()
             result = fit_psl(table.features, table.scores)
+        case "add":
+            result = fit_psl(table.features, table.scores, k=len(table.features)+1)
+            table.insert_feature(result["features"][-1], None, result["scores"][-1])
         case "fill":
             result = fit_psl(table.features, table.scores, None)
 
@@ -125,7 +128,7 @@ class Dataset:
 def fit_psl(features=None, scores=None, k="predef"):
     X, y, f = Dataset()()
 
-    psl = ProbabilisticScoringList({1})
+    psl = ProbabilisticScoringList({-1,1,2})
     scores = [scores[f_] for f_ in features]
     psl.fit(X, y, predef_features=features, predef_scores=scores, k=k)
     df = psl.inspect(feature_names=f)
@@ -165,7 +168,7 @@ def fit_psl(features=None, scores=None, k="predef"):
         headings= [col[4:] for col in df.columns if col.startswith("T = ")],
         rows=table,
         labels=list(range(len(psl))),
-        metric=[balanced_accuracy_score(y, stage.predict(X), adjusted=True) for  stage in  psl],
+        metric=[roc_auc_score(y, stage.predict(X)) for stage in  psl],
         features=psl.features,
         scores=psl.scores,
     )
