@@ -8,6 +8,8 @@ import pandas as pd
 from sklearn.datasets import fetch_openml
 from sklearn.metrics import roc_auc_score
 
+from datetime import now
+
 
 def index(request):
     session_key = request.session.session_key
@@ -23,7 +25,7 @@ def index(request):
         )
         user_table.save()
 
-    return render(request, "index.pug", fit_psl(user_table.features, user_table.scores))
+    return render(request, "index.pug", fit_psl(user_table.features, user_table.scores)| dict(historylength=100))
 
 
 def update_table(request):
@@ -69,7 +71,13 @@ def update_table(request):
 
             result = fit_psl(table.features, table.scores)
 
-    return render(request, "pslresult.pug", result)
+    return render(request, "pslresult.pug", result| dict(historylength=100))
+
+def updateHistory(request):
+    # TODO
+    histln = 2
+    name = request.GET.get("saveName") or f"{histln} {now().isoformat()}"
+    return render(request, "history.pug", None)
 
 
 class Dataset:
@@ -168,7 +176,7 @@ def fit_psl(features=None, scores=None, k="predef"):
         headings= [col[4:] for col in df.columns if col.startswith("T = ")],
         rows=table,
         labels=list(range(len(psl))),
-        metric=[roc_auc_score(y, stage.predict(X)) for stage in  psl],
+        metric=[roc_auc_score(y, stage.predict_proba(X)[:,1]) for stage in psl],
         features=psl.features,
         scores=psl.scores,
     )

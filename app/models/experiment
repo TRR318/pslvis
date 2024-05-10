@@ -1,0 +1,7 @@
+from typing import Any
+from django.db import models
+
+
+class Experiment(models.Model):
+    session_key = models.CharField(max_length=40, unique=True, default="0")
+    data_field = models.JSONField(default=list)

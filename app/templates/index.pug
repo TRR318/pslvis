@@ -27,8 +27,19 @@ html(lang='en')
               span.mdi.mdi-github.fs-4.btn.btn-sm
               span Visualization
 
+    include history.pug
     include pslresult.pug
     
+
+    style.
+      .ghost :not(.label){
+        display: none !important;
+      }
+      li:hover .add, li:hover .remove{
+        display: inline-block !important;
+      }
+
+
     script.
       function loadStart(){
         document.querySelectorAll("#feature-container .loading").forEach(e => {
@@ -100,6 +111,158 @@ html(lang='en')
               }
             });
           })
+
+        // fix to delete orphaned tooltips
+        document.querySelectorAll(".tooltip.bs-tooltip-auto").forEach(e => e.remove())
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tr => new bootstrap.Tooltip(tr))
+        
+        const saveButton = document.getElementById('save');
+        const filenameInput = document.getElementById('filename');
+        const saveConfirmButton = document.getElementById('save-confirm');
+
+        saveButton.addEventListener('click', function() {
+          filenameInput.classList.remove("d-none")
+          saveConfirmButton.classList.remove("d-none")
+          saveButton.classList.add("d-none")
+          filenameInput.focus();
+        });
+
+        function restoreSaveButton(){
+          filenameInput.classList.add("d-none")
+          saveConfirmButton.classList.add("d-none")
+          saveButton.classList.remove("d-none")
+        }
+
+        function saveHistory(){
+          const saveName = filenameInput.value.trim();
+          filenameInput.value = '';
+          
+          // TODO ajax call replacing history
+          // TODO then update history button count
+          restoreSaveButton();
+        }
+
+        filenameInput.addEventListener('keydown', function(event) {
+          if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent the default action to avoid form submission or any other unintended effects
+            saveHistory();
+          } else if (event.key === 'Escape') {
+            event.preventDefault(); // Prevent the default action to avoid form submission or any other unintended effects
+            restoreSaveButton();
+          }
+        });
+        filenameInput.addEventListener('blur', restoreSaveButton);
+        saveConfirmButton.addEventListener('click', saveHistory);      
+
+
+        var observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+              mutation.target.querySelectorAll(".cell.label").forEach(elem => {
+              if (mutation.target.classList.contains('ghost')) {
+                elem.classList.remove("col-3");
+              } else {
+                elem.classList.add("col-3");
+              }
+            });
+          });
+        });
+
+        document.querySelectorAll('li')
+          .forEach(elem => {observer.observe(elem, {
+            attributes: true,
+            attributeFilter: ['class']
+          });
+        });
+
+        document.querySelectorAll("#unused .add")
+          .forEach(e => {
+            e.onclick = e => {
+              loadStart();          
+              htmx.ajax("GET", "/update-table", {
+                target: "#feature-container",
+                swap: "outerHTML",
+                values: {
+                  type: "feature",
+                  feature: e.target.closest("li").dataset.feature,
+                  fromList: "unused",
+                  toList: "used",
+                }
+              });
+            }
+          });
+        document.querySelectorAll("#used .remove")
+          .forEach(e => {
+            e.onclick = e => {
+              loadStart();          
+              htmx.ajax("GET", "/update-table", {
+                target: "#feature-container",
+                swap: "outerHTML",
+                values: {
+                  type: "feature",
+                  feature: e.target.closest("li").dataset.feature,
+                  fromList: "used",
+                  toList: "unused",
+                }
+              });
+            }
+          });
+
+        document.querySelectorAll("#used .incr")
+          .forEach(e => {
+            e.onclick = e => {
+              loadStart();
+              htmx.ajax("GET", "/update-table", {
+                target: "#feature-container",
+                swap: "outerHTML",
+                values: {
+                  type: "score",
+                  feature: e.target.closest("li").dataset.feature,
+                  diff: 1
+                }
+              });
+            }
+          });
+
+        document.querySelectorAll("#used .decr")
+          .forEach(e => {
+            e.onclick = e => {
+              loadStart();
+              htmx.ajax("GET", "/update-table", {
+                target: "#feature-container",
+                swap: "outerHTML",
+                values: {
+                  type: "score",
+                  feature: e.target.closest("li").dataset.feature,
+                  diff: -1
+                }
+              });
+            }
+          });
+
+        new Chart(document.querySelector("#chart").getContext('2d'), {
+          type: "line",
+          data: {
+            labels: !{labels},
+            datasets: [{
+              label: 'ROC area under curve per stage',
+              data: !{metric},
+              borderColor: 'rgb(75, 192, 192)' 
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: false,
+                max: 1.02,   // Set the maximum value of the y-axis
+              }
+            },
+            animation: {
+              duration: 0
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+          }
+        });
       }
 
       document.addEventListener('DOMContentLoaded', initialize);

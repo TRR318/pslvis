@@ -1,8 +1,6 @@
 from typing import Any
 from django.db import models
 
-import pandas as pd
-
 
 class Data(models.Model):
     session_key = models.CharField(max_length=40, unique=True, default="0")
