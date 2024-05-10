@@ -1,34 +1,50 @@
 from pathlib import Path
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
-from .models import Data
+from .models import *
 from skpsl import ProbabilisticScoringList
 import numpy as np
 import pandas as pd
 from sklearn.datasets import fetch_openml
 from sklearn.metrics import roc_auc_score
 
-from datetime import now
+from datetime import datetime
 
 
-def index(request):
+def create_subject(request, experiment):
+    # create new subject
+    subj = Subject.objects.create(
+        experiment=Experiment.objects.get(sid=experiment),
+    )
+
+    # load index page
+    return redirect(f"/{experiment}/{subj.id}/")
+
+
+def index(request, experiment, subject):
+    Subject.objects.get(id=subject)
+
     session_key = request.session.session_key
     if not session_key:
         request.session.save()
         session_key = request.session.session_key
 
     try:
-        user_table = Data.objects.get(session_key=session_key)
+        user_table = Subject.objects.get(session_key=session_key)
     except Data.DoesNotExist:
         user_table = Data(
             session_key=session_key, data_field=dict(features=[], scores={})
         )
         user_table.save()
 
-    return render(request, "index.pug", fit_psl(user_table.features, user_table.scores)| dict(historylength=100))
+    return render(
+        request,
+        "index.pug",
+        fit_psl(user_table.features, user_table.scores) | dict(historylength=100),
+    )
 
 
-def update_table(request):
+def update_table(request, experiment, subject):
     print(request.GET)
 
     session_key = request.session.session_key
@@ -60,7 +76,7 @@ def update_table(request):
             table.reset()
             result = fit_psl(table.features, table.scores)
         case "add":
-            result = fit_psl(table.features, table.scores, k=len(table.features)+1)
+            result = fit_psl(table.features, table.scores, k=len(table.features) + 1)
             table.insert_feature(result["features"][-1], None, result["scores"][-1])
         case "fill":
             result = fit_psl(table.features, table.scores, None)
@@ -71,12 +87,13 @@ def update_table(request):
 
             result = fit_psl(table.features, table.scores)
 
-    return render(request, "pslresult.pug", result| dict(historylength=100))
+    return render(request, "pslresult.pug", result | dict(historylength=100))
+
 
 def updateHistory(request):
     # TODO
     histln = 2
-    name = request.GET.get("saveName") or f"{histln} {now().isoformat()}"
+    name = request.GET.get("saveName") or f"{histln} {datetime.now().isoformat()}"
     return render(request, "history.pug", None)
 
 
@@ -136,7 +153,7 @@ class Dataset:
 def fit_psl(features=None, scores=None, k="predef"):
     X, y, f = Dataset()()
 
-    psl = ProbabilisticScoringList({-1,1,2})
+    psl = ProbabilisticScoringList({-1, 1, 2})
     scores = [scores[f_] for f_ in features]
     psl.fit(X, y, predef_features=features, predef_scores=scores, k=k)
     df = psl.inspect(feature_names=f)
@@ -149,7 +166,6 @@ def fit_psl(features=None, scores=None, k="predef"):
     if "Threshold" not in df:
         df["Threshold"] = np.nan
 
-    
     table = pd.DataFrame(
         dict(
             # calculate feature index
@@ -168,15 +184,16 @@ def fit_psl(features=None, scores=None, k="predef"):
                 name="Probas",
             ),
         )
-    ).to_dict("records")[1:] # drop stage 0 and convert into list of dicts
+    ).to_dict("records")[
+        1:
+    ]  # drop stage 0 and convert into list of dicts
 
-    
     return dict(
         var=unused,
-        headings= [col[4:] for col in df.columns if col.startswith("T = ")],
+        headings=[col[4:] for col in df.columns if col.startswith("T = ")],
         rows=table,
         labels=list(range(len(psl))),
-        metric=[roc_auc_score(y, stage.predict_proba(X)[:,1]) for stage in psl],
+        metric=[roc_auc_score(y, stage.predict_proba(X)[:, 1]) for stage in psl],
         features=psl.features,
         scores=psl.scores,
     )

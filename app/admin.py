@@ -1,5 +1,6 @@
 from django.contrib import admin
 
-from .models import Data
+from .models import Dataset, Experiment, Subject, LogEntry
 
-admin.site.register(Data)
+for cls in [Dataset, Experiment, Subject, LogEntry]:
+    admin.site.register(cls)
