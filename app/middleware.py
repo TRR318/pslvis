@@ -1,4 +1,4 @@
-from models import LogEntry, Subject
+from .models import LogEntry, Subject
 
 
 class RequestLoggingMiddleware:

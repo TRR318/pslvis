@@ -14,41 +14,27 @@ from datetime import datetime
 def create_subject(request, experiment):
     # create new subject
     subj = Subject.objects.create(
-        experiment=Experiment.objects.get(sid=experiment),
+        experiment=Experiment.objects.get(id=experiment),
     )
 
     # load index page
-    return redirect(f"/{experiment}/{subj.id}/")
+    return redirect(f"{experiment}/{subj.id}/")
 
 
 def index(request, experiment, subject):
-    Subject.objects.get(id=subject)
-
-    session_key = request.session.session_key
-    if not session_key:
-        request.session.save()
-        session_key = request.session.session_key
-
-    try:
-        user_table = Subject.objects.get(session_key=session_key)
-    except Data.DoesNotExist:
-        user_table = Data(
-            session_key=session_key, data_field=dict(features=[], scores={})
-        )
-        user_table.save()
+    model = Subject.objects.get(id=subject).last_model
 
     return render(
         request,
         "index.pug",
-        fit_psl(user_table.features, user_table.scores) | dict(historylength=100),
+        fit_psl(model.features, model.scores) | dict(historylength=100),
     )
 
 
 def update_table(request, experiment, subject):
     print(request.GET)
 
-    session_key = request.session.session_key
-    table = Data.objects.get(session_key=session_key)
+    table = Subject.objects.get(id=subject).last_model
 
     match request.GET.get("type"):
         case "feature":
@@ -72,23 +58,29 @@ def update_table(request, experiment, subject):
             diff = int(request.GET.get("diff"))
             table.update_score(feature_index, diff=diff)
             result = fit_psl(table.features, table.scores)
-        case "reset":
-            table.reset()
-            result = fit_psl(table.features, table.scores)
-        case "add":
-            result = fit_psl(table.features, table.scores, k=len(table.features) + 1)
-            table.insert_feature(result["features"][-1], None, result["scores"][-1])
-        case "fill":
-            result = fit_psl(table.features, table.scores, None)
-
-            table.reset()
-            for f, s in zip(result["features"], result["scores"]):
-                table.insert_feature(f, None, s)
-
-            result = fit_psl(table.features, table.scores)
-
     return render(request, "pslresult.pug", result | dict(historylength=100))
 
+
+def reset(request, experiment, subject):
+    table = Subject.objects.get(id=subject).last_model
+    table.reset()
+    return render(request, "pslresult.pug", fit_psl(table.features, table.scores) | dict(historylength=100))
+
+def add(request, experiment, subject):
+    table = Subject.objects.get(id=subject).last_model
+    result = fit_psl(table.features, table.scores, k=len(table.features) + 1)
+    if len(table.features) < len(result["features"]):
+        # only add a feature if we have not yet added all features
+        table.insert_feature(result["features"][-1], None, result["scores"][-1])
+    return render(request, "pslresult.pug", fit_psl(table.features, table.scores) | dict(historylength=100))
+
+def fill(request, experiment, subject):
+    table = Subject.objects.get(id=subject).last_model
+    result = fit_psl(table.features, table.scores, None)
+    table.reset()
+    for f, s in zip(result["features"], result["scores"]):
+        table.insert_feature(f, None, s)
+    return render(request, "pslresult.pug", fit_psl(table.features, table.scores) | dict(historylength=100))
 
 def updateHistory(request):
     # TODO
@@ -151,6 +143,9 @@ class Dataset:
 
 
 def fit_psl(features=None, scores=None, k="predef"):
+    # TODO use caching i.e. the PslResults table
+
+    # TODO properly get the dataset from the database
     X, y, f = Dataset()()
 
     psl = ProbabilisticScoringList({-1, 1, 2})

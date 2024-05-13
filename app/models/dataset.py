@@ -3,8 +3,8 @@ from django.db import models
 
 
 class Dataset(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    name = models.CharField(verbose_name="Friendly name of the Dataset",max_length=30)
-    # a dictionary mapping feature index to friendly feature names
-    featurenames = models.JSONField(default=dict)
-    filepath = models.CharField(max_length=300)
+    name = models.CharField(primary_key=True, max_length=30)
+    friendlyname = models.CharField(verbose_name="Friendly name of the Dataset",max_length=30)
+    featurenames = models.JSONField(verbose_name="Friendly feature names as a json-list", default=list)
+    filepath = models.FileField(verbose_name="Dataset as csv. First column must be target", upload_to="dataset/")
+
