@@ -28,6 +28,15 @@ html(lang='en')
               span Visualization
 
     include history.pug
+    .container.mt-5
+      .row
+        .col-sm-6.col-lg-4
+          h4 Interactive PSL
+          p You can drag and drop features from left to right and observe how the performance changes
+          //p Predict the presence of breast cancer. Which features would be most influencial?
+          p Predict whether a student is likely to drop out of university. Which features would be most influencial?
+        .col-sm-6.offset-lg-4.col-lg-4
+          canvas#chart(height="180px")
     #model-container.container.mt-5
       include pslresult.pug
     #spinner.position-fixed.top-50.start-50.spinner-border.htmx-indicator
@@ -52,28 +61,53 @@ html(lang='en')
           e.style.userSelect = "none";
         });
       });
-      
+
       function update_table(event, values){
           values["feature"] = event.target.closest("li").dataset.feature;
           htmx.ajax("GET", "update-table", {target: "#model-container", values: values });
       }
-      const add = (event) => update_table(event, {
-        type: "feature",
-        fromList: "unused",
-        toList: "used",
-      });
-      const remove = (event) => update_table(event, {
-        type: "feature",
-        fromList: "used",
-        toList: "unused",
-      });
+      const add = (event) => update_table(event, {type: "feature", fromList: "unused", toList: "used"});
+      const remove = (event) => update_table(event, {type: "feature", fromList: "used", toList: "unused"});
       const score = (event, diff) => update_table(event, {type: "score", diff: diff});
       
+      const chart = new Chart(document.querySelector("#chart").getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'ROC area under curve per stage',
+            borderColor: 'rgb(75, 192, 192)',
+            data: data,
+          }],
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            max: 1.02,   // Set the maximum value of the y-axis
+          }
+        },
+        options: {
+          animation: {
+            duration: 0
+          },
+          responsive: true,
+          maintainAspectRatio: false,
+        }
+      });
+
       function initialize() {
         // fix to delete orphaned tooltips
         document.querySelectorAll(".tooltip.bs-tooltip-auto").forEach(e => e.remove())
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tr => new bootstrap.Tooltip(tr))
 
+                
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = data;
+        chart.update();
+
+
+        // SORTABLE STUFF
+        //////////////////
         const observer = new MutationObserver(function (mutations) {
           mutations.forEach(function (mutation) {
             mutation.target.querySelectorAll(".cell.label").forEach(elem => {
@@ -118,9 +152,11 @@ html(lang='en')
                 }
               }
             });
-          })
+          });
 
 
+        // HISTORY STUFF
+        /////////////////
         const saveButton = document.getElementById('save');
         const filenameInput = document.getElementById('filename');
         const saveConfirmButton = document.getElementById('save-confirm');
@@ -158,9 +194,11 @@ html(lang='en')
         });
         filenameInput.addEventListener('blur', restoreSaveButton);
         saveConfirmButton.addEventListener('click', saveHistory);
-
-        initChart();
       }
 
-      document.addEventListener('DOMContentLoaded', initialize);
-      document.body.addEventListener('htmx:afterSwap', initialize);
+      document.addEventListener('DOMContentLoaded', function(){
+        initialize();
+      });
+
+
+      document.body.addEventListener('htmx:afterSettle', initialize);
