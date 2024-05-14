@@ -10,3 +10,8 @@ class Experiment(models.Model):
         verbose_name="Dataset attached to the Experiment",
         on_delete=models.CASCADE,
     )
+
+    internal_name = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.internal_name or str(self.id)
