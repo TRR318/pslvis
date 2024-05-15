@@ -15,6 +15,7 @@ pypugjs = "^5.9.12"
 numpy = "^1.26.4"
 scikit-learn = "^1.4.2"
 gunicorn = "^22.0.0"
+django-cors-headers = "^4.3.1"
 
 
 [build-system]
