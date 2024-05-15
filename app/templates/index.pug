@@ -80,13 +80,14 @@ html(lang='en')
             data: data,
           }],
         },
-        scales: {
-          y: {
-            beginAtZero: false,
-            max: 1.02,   // Set the maximum value of the y-axis
-          }
-        },
         options: {
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 0.5,   // Set the minimum value of the y-axis
+              max: 1.0,   // Set the maximum value of the y-axis
+            }
+          },
           animation: {
             duration: 0
           },
