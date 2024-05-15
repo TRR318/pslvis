@@ -12,7 +12,7 @@ html(lang='en')
     script(src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js")
     script(src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js")
   body
-    header.navbar.navbar-expand-lg.sticky-top.bg-success-subtle
+    header.navbar.navbar-expand-lg.sticky-top.bg-success-subtle#psl-navbar
       nav.container-xxl.flex-wrap.flex-lg-nowrap 
         ul.nav 
           li.nav-item 
@@ -53,6 +53,15 @@ html(lang='en')
 
 
     script.
+      if (window.location !== window.parent.location) {
+            // Hide the psl-navbar div
+            document.getElementById('psl-navbar').style.display = 'none';
+        }
+      window.onload = function() {
+            var height = document.body.scrollHeight;
+            window.parent.postMessage({ height: height }, 'http://localhost:8000/');  // Replace with your parent domain
+        };
+
       htmx.on("htmx:beforeRequest", function() {
         document.querySelectorAll("#model-container .loading")
         .forEach(e => {
