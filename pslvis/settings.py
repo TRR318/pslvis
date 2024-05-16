@@ -32,12 +32,16 @@ if host is None:
 else:
     ALLOWED_HOSTS = host.split(",")
 
+cors = os.environ.get('CORS_PARENT')
+if cors is None:
+    CORS_ALLOWED_ORIGINS = []
+    STANDALONE = True
+else:
+    CORS_ALLOWED_ORIGINS = cors.split(",")
+    STANDALONE = False
 
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://your-production-domain.com",
-]
+
 
 CORS_ALLOW_METHODS = [
     'GET',
@@ -76,8 +80,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "app.request_logging_middleware.RequestLoggingMiddleware",
-    "app.cors_middleware.ContentSecurityPolicyMiddleware",
+    "app.middleware.RequestLoggingMiddleware",
+    "app.middleware.ContentSecurityPolicyMiddleware",
 ]
 
 ROOT_URLCONF = "pslvis.urls"
