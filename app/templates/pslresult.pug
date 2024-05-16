@@ -44,7 +44,7 @@
             = row.score
             span.mdi.mdi-plus.btn.btn-sm.p-0.incr(onclick="score(event, 1)")
           each val in row.probas
-            .cell.col.border-start.pt-2.pb-2.text-truncate= val
+            .cell.col.border-start.pt-2.pb-2.text-truncate.proba-cell= val
 
 script.
   labels = !{labels};
