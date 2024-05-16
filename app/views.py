@@ -1,5 +1,6 @@
 from pathlib import Path
 from django.shortcuts import render, redirect
+from django.conf import settings
 
 from .models import *
 from skpsl import ProbabilisticScoringList
@@ -27,7 +28,7 @@ def index(request, experiment, subject):
     return render(
         request,
         "index.pug",
-        fit_psl(model.features, model.scores) | dict(historylength=100),
+        fit_psl(model.features, model.scores) | dict(historylength=100) | dict(standalone = settings.STANDALONE),
     )
 
 

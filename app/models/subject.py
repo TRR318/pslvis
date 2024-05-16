@@ -18,6 +18,9 @@ class Subject(models.Model):
             return models[0]
         model = PslParam.objects.create(subject=self)
         return model
+    
+    def __str__(self):
+        return f"Subject {self.id} @ {self.experiment.internal_name} - {self.experiment.id}"
 
 
 class PslParam(models.Model):

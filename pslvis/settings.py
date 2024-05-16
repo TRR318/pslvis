@@ -28,10 +28,36 @@ DEBUG = True
 
 host = os.environ.get('ALLOWED_HOSTS')
 if host is None:
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ["*"]
 else:
     ALLOWED_HOSTS = host.split(",")
 
+cors = os.environ.get('CORS_PARENT')
+if cors is None:
+    CORS_ALLOWED_ORIGINS = []
+    STANDALONE = True
+else:
+    CORS_ALLOWED_ORIGINS = cors.split(",")
+    STANDALONE = False
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+CORS_ALLOW_METHODS = [
+    'GET',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Application definition
 
@@ -42,6 +68,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "app"
 ]
 
@@ -54,6 +81,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "app.middleware.RequestLoggingMiddleware",
+    "app.middleware.ContentSecurityPolicyMiddleware",
 ]
 
 ROOT_URLCONF = "pslvis.urls"
