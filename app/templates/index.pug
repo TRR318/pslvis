@@ -12,20 +12,21 @@ html(lang='en')
     script(src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js")
     script(src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js")
   body
-    header.navbar.navbar-expand-lg.sticky-top.bg-success-subtle
-      nav.container-xxl.flex-wrap.flex-lg-nowrap 
-        ul.nav 
-          li.nav-item 
-            h1 PSLvis
-        ul.nav
-          li.nav-item
-            a.link-secondary.link-underline.link-underline-opacity-0(href="https://github.com/TRR318/scikit-psl")
-              span.mdi.mdi-github.fs-4.btn.btn-sm
-              span Algorithm
-          li.nav-item
-            a.link-secondary.link-underline.link-underline-opacity-0(href="https://github.com/TRR318/pslvis")
-              span.mdi.mdi-github.fs-4.btn.btn-sm
-              span Visualization
+    if standalone
+      header.navbar.navbar-expand-lg.sticky-top.bg-success-subtle
+        nav.container-xxl.flex-wrap.flex-lg-nowrap 
+          ul.nav 
+            li.nav-item 
+              h1 PSLvis
+          ul.nav
+            li.nav-item
+              a.link-secondary.link-underline.link-underline-opacity-0(href="https://github.com/TRR318/scikit-psl")
+                span.mdi.mdi-github.fs-4.btn.btn-sm
+                span Algorithm
+            li.nav-item
+              a.link-secondary.link-underline.link-underline-opacity-0(href="https://github.com/TRR318/pslvis")
+                span.mdi.mdi-github.fs-4.btn.btn-sm
+                span Visualization
 
     include history.pug
     .container.mt-5
@@ -80,13 +81,14 @@ html(lang='en')
             data: data,
           }],
         },
-        scales: {
-          y: {
-            beginAtZero: false,
-            max: 1.02,   // Set the maximum value of the y-axis
-          }
-        },
         options: {
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 0.5,   // Set the minimum value of the y-axis
+              max: 1.02,   // Set the maximum value of the y-axis
+            }
+          },
           animation: {
             duration: 0
           },
@@ -96,6 +98,9 @@ html(lang='en')
       });
 
       function initialize() {
+        // Send height to iframe parent
+        window.parent.postMessage({ height: document.body.scrollHeight }, '*');
+
         // fix to delete orphaned tooltips
         document.querySelectorAll(".tooltip.bs-tooltip-auto").forEach(e => e.remove())
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tr => new bootstrap.Tooltip(tr))
