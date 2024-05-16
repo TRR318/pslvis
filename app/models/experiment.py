@@ -5,7 +5,7 @@ from .dataset import Dataset
 
 class Experiment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid, editable=False)
-    name = models.ForeignKey(
+    dataset = models.ForeignKey(
         Dataset,
         verbose_name="Dataset attached to the Experiment",
         on_delete=models.CASCADE,

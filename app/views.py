@@ -6,7 +6,6 @@ from .models import *
 from skpsl import ProbabilisticScoringList
 import numpy as np
 import pandas as pd
-from sklearn.datasets import fetch_openml
 from sklearn.metrics import roc_auc_score
 
 from datetime import datetime
@@ -23,20 +22,19 @@ def create_subject(request, experiment):
 
 
 def index(request, experiment, subject):
-    model = Subject.objects.get(id=subject).last_model
+    subj = Subject.objects.get(id=subject)
+    model = subj.last_model
 
     return render(
         request,
         "index.pug",
-        fit_psl(model.features, model.scores) | dict(historylength=100) | dict(standalone = settings.STANDALONE),
+        fit_psl(subj.dataset,model.features, model.scores) | dict(historylength=100) | dict(standalone = settings.STANDALONE),
     )
 
 
 def update_table(request, experiment, subject):
-    print(request.GET)
-
-    table = Subject.objects.get(id=subject).last_model
-
+    subj = Subject.objects.get(id=subject)
+    table = subj.last_model
     match request.GET.get("type"):
         case "feature":
             feature_index = int(request.GET.get("feature"))
@@ -53,35 +51,37 @@ def update_table(request, experiment, subject):
                 from_ = int(request.GET.get("from")) - 1
                 to_ = int(request.GET.get("to")) - 1
                 table.move_feature(from_, to_)
-            result = fit_psl(table.features, table.scores)
+            result = fit_psl(subj.dataset,table.features, table.scores)
         case "score":
             feature_index = int(request.GET.get("feature"))
             diff = int(request.GET.get("diff"))
             table.update_score(feature_index, diff=diff)
-            result = fit_psl(table.features, table.scores)
+            result = fit_psl(subj.dataset,table.features, table.scores)
     return render(request, "pslresult.pug", result | dict(historylength=100))
 
 
 def reset(request, experiment, subject):
     table = Subject.objects.get(id=subject).last_model
     table.reset()
-    return render(request, "pslresult.pug", fit_psl(table.features, table.scores) | dict(historylength=100))
+    return render(request, "pslresult.pug", fit_psl(subj.dataset,table.features, table.scores) | dict(historylength=100))
 
 def add(request, experiment, subject):
-    table = Subject.objects.get(id=subject).last_model
-    result = fit_psl(table.features, table.scores, k=len(table.features) + 1)
+    subj = Subject.objects.get(id=subject)
+    table = subj.last_model    
+    result = fit_psl(subj.dataset,table.features, table.scores, k=len(table.features) + 1)
     if len(table.features) < len(result["features"]):
         # only add a feature if we have not yet added all features
         table.insert_feature(result["features"][-1], None, result["scores"][-1])
-    return render(request, "pslresult.pug", fit_psl(table.features, table.scores) | dict(historylength=100))
+    return render(request, "pslresult.pug", fit_psl(subj.dataset,table.features, table.scores) | dict(historylength=100))
 
 def fill(request, experiment, subject):
-    table = Subject.objects.get(id=subject).last_model
-    result = fit_psl(table.features, table.scores, None)
+    subj = Subject.objects.get(id=subject)
+    table = subj.last_model
+    result = fit_psl(subj.dataset, table.features, table.scores, None)
     table.reset()
     for f, s in zip(result["features"], result["scores"]):
         table.insert_feature(f, None, s)
-    return render(request, "pslresult.pug", fit_psl(table.features, table.scores) | dict(historylength=100))
+    return render(request, "pslresult.pug", fit_psl(subj.dataset,table.features, table.scores) | dict(historylength=100))
 
 def updateHistory(request):
     # TODO
@@ -89,65 +89,15 @@ def updateHistory(request):
     name = request.GET.get("saveName") or f"{histln} {datetime.now().isoformat()}"
     return render(request, "history.pug", None)
 
-
-class Dataset:
-    X, y, f = None, None, None
-
-    def __call__(self):
-        if Dataset.X is None:
-            p = Path("data/schüler.csv")
-            if p.is_file():
-                df = pd.read_csv(p.absolute())
-                target = "dropout"
-                all_features = [
-                    "age_enroll",
-                    "migrant",
-                    "Gesamtnote Abschlusszeugnis",
-                    "Big Five: Gewissenhaftigkeit",
-                    "Big Five: Verträglichkeit",
-                    "Big Five: Extraversion",
-                    "Big Five: Offenheit/Intellekt",
-                    "Big Five: Neurotizismus",
-                    "fernstudium",
-                    "berufsbegleitendes Studium",
-                    "study_Ing",
-                    "study_ReWiSo",
-                    "male",
-                    "study_SprKult",
-                    "study_Sport",
-                    "study_MatNat",
-                    "study_MedGesund",
-                    "study_agrar",
-                    "study_Kunst",
-                ]
-                #'gymnasium', 'mathe_leistungskurs','dualer Studiengang',
-                Dataset.X, y = df[all_features], df[target]
-                Dataset.y = np.array(y == 1, dtype=int)
-                Dataset.f = all_features
-            else:
-                Dataset.X, y = fetch_openml(
-                    data_id=42900, return_X_y=True, as_frame=False
-                )
-                Dataset.y = np.array(y == 2, dtype=int)
-                Dataset.f = [
-                    "Age (years)",
-                    "BMI (kg/m2)",
-                    "Glucose (mg/dL)",
-                    "Insulin (microgram/mL)",
-                    "HOMA",
-                    "Leptin (ng/mL)",
-                    "Adiponectin (microg/mL)",
-                    "Resistin (ng/mL)",
-                    "MCP-1 (pg/dL)",
-                ]
-        return Dataset.X, Dataset.y, Dataset.f
-
-
-def fit_psl(features=None, scores=None, k="predef"):
+def fit_psl(dataset:Dataset, features=None, scores=None, k="predef"):
     # TODO use caching i.e. the PslResults table
 
     # TODO properly get the dataset from the database
-    X, y, f = Dataset()()
+    df = pd.read_csv(dataset.path)
+    X = df.iloc[:,:1]
+    y = df.iloc[:,0]
+    f = dataset.featurenames
+
 
     psl = ProbabilisticScoringList({-1, 1, 2})
     scores = [scores[f_] for f_ in features]
