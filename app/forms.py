@@ -19,13 +19,16 @@ class DatasetForm(forms.ModelForm):
 
     def clean_filepath(self):
         try:
-            bio = self.cleaned_data.get("filepath").file
-            bio.seek(0)
-            df = pd.read_csv(bio)
+            filepath = self.cleaned_data.get("filepath")
+            file = filepath.file
+            file.seek(0)
+            df = pd.read_csv(file)
+            if not set(df.iloc[:,0]) <= {0,1}:
+                raise ValidationError("Column one must be the target column and only contain 0 and 1 values")
+            return filepath
         except pd.EmptyDataError:
             raise ValidationError("Dataset apears to be empty")
         except Exception:            
             raise ValidationError("Appears not to be a csv")
         
-        if not set(df.iloc[:,0]) <= {0,1}:
-            raise ValidationError("Column one must be the target column and only contain 0 and 1 values")
+        

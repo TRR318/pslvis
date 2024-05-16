@@ -10,3 +10,7 @@ class Dataset(models.Model):
 
     def __str__(self):
         return self.friendlyname
+    
+    @property
+    def path(self):
+        return self.filepath.path
