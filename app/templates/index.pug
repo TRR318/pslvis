@@ -1,3 +1,5 @@
+{% load static %}
+
 doctype html
 html(lang='en')
   head
@@ -52,6 +54,7 @@ html(lang='en')
         display: inline-block !important;
       }
 
+    script(type="module" src="{% static 'js/initialize.js' %}")
 
     script.
       htmx.on("htmx:beforeRequest", function() {
@@ -96,114 +99,3 @@ html(lang='en')
           maintainAspectRatio: false,
         }
       });
-
-      function initialize() {
-        // Send height to iframe parent
-        window.parent.postMessage({ height: document.body.scrollHeight }, '*');
-
-        // fix to delete orphaned tooltips
-        document.querySelectorAll(".tooltip.bs-tooltip-auto").forEach(e => e.remove())
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tr => new bootstrap.Tooltip(tr))
-
-                
-        chart.data.labels = labels;
-        chart.data.datasets[0].data = data;
-        chart.update();
-
-
-        // SORTABLE STUFF
-        //////////////////
-        const observer = new MutationObserver(function (mutations) {
-          mutations.forEach(function (mutation) {
-            mutation.target.querySelectorAll(".cell.label").forEach(elem => {
-            if (mutation.target.classList.contains('ghost')) {
-              elem.classList.remove("col-3");
-            } else {
-              elem.classList.add("col-3");
-            }
-            });
-          });
-        });
-
-        document.querySelectorAll('#feature-container li')
-          .forEach(elem => {observer.observe(elem, {
-            attributes: true,
-            attributeFilter: ['class']
-          });
-        });
-
-        document.querySelectorAll("#feature-container ul")
-          .forEach(ul => {
-            new Sortable(ul, {
-              animation:150,
-              group: "features",
-              ghostClass: "ghost",	
-              handle: ".draghandle",
-              onEnd: function(evt) {
-                if (evt.oldIndex !== evt.newIndex || evt.from.id !== evt.to.id) {
-                  // Trigger htmx to send information to the server
-                  evt.item.classList.add("ghost")
-                  htmx.ajax("GET", "update-table", {
-                    target: "#model-container",
-                    values: {
-                      type: "feature",
-                      from: evt.oldIndex,
-                      to: evt.newIndex,
-                      feature: evt.item.dataset.feature,
-                      fromList: evt.from.id,
-                      toList: evt.to.id,
-                    }
-                  });
-                }
-              }
-            });
-          });
-
-
-        // HISTORY STUFF
-        /////////////////
-        const saveButton = document.getElementById('save');
-        const filenameInput = document.getElementById('filename');
-        const saveConfirmButton = document.getElementById('save-confirm');
-
-        saveButton.addEventListener('click', function() {
-          filenameInput.classList.remove("d-none")
-          saveConfirmButton.classList.remove("d-none")
-          saveButton.classList.add("d-none")
-          filenameInput.focus();
-        });
-
-        function restoreSaveButton(){
-          filenameInput.classList.add("d-none")
-          saveConfirmButton.classList.add("d-none")
-          saveButton.classList.remove("d-none")
-        }
-
-        function saveHistory(){
-          const saveName = filenameInput.value.trim();
-          filenameInput.value = '';
-
-          // TODO ajax call replacing history
-          // TODO then update history button count
-          restoreSaveButton();
-        }
-
-        filenameInput.addEventListener('keydown', function(event) {
-          if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent the default action to avoid form submission or any other unintended effects
-            saveHistory();
-          } else if (event.key === 'Escape') {
-            event.preventDefault(); // Prevent the default action to avoid form submission or any other unintended effects
-            restoreSaveButton();
-          }
-        });
-        filenameInput.addEventListener('blur', restoreSaveButton);
-        saveConfirmButton.addEventListener('click', saveHistory);
-      }
-
-      document.addEventListener('DOMContentLoaded', function(){
-        initialize();
-      });
-
-
-      document.body.addEventListener('htmx:afterSettle', initialize);
