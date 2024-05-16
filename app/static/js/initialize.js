@@ -21,8 +21,5 @@ function initialize() {
     heatmap();
 }
 
-document.addEventListener('DOMContentLoaded', function(){
-    initialize();
-  });
-
-  document.body.addEventListener('htmx:afterSettle', initialize);
+document.addEventListener('DOMContentLoaded', initialize);
+htmx.on('htmx:afterSettle', initialize);

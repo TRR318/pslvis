@@ -1,10 +1,12 @@
 from secrets import token_urlsafe
+
 from django.db import models
+
 from .experiment import Experiment
 
 
 class Subject(models.Model):
-    id = models.SlugField(primary_key=True, default=token_urlsafe(8), editable=False)
+    id = models.SlugField(primary_key=True, default=lambda: token_urlsafe(8), editable=False)
     experiment = models.ForeignKey(
         Experiment,
         verbose_name="Experiment this subject is part of",
@@ -14,7 +16,7 @@ class Subject(models.Model):
     @property
     def hist_len(self):
         return self.models.count()
-    
+
     @property
     def model_dict(self):
         return {model.id: model.name for model in self.active_models.order_by("-updated_at")}
@@ -22,7 +24,7 @@ class Subject(models.Model):
     @property
     def active_models(self):
         return self.models.filter(deleted=False)
-    
+
     @property
     def last_model(self):
         models = self.active_models.order_by("-updated_at")
@@ -30,11 +32,11 @@ class Subject(models.Model):
             return models[0]
         model = PslParam.objects.create(subject=self)
         return model
-    
+
     @property
     def dataset(self):
         return self.experiment.dataset
-    
+
     def __str__(self):
         return f"Subject {self.id} @ {self.experiment.internal_name} - {self.experiment.id}"
 
