@@ -21,7 +21,7 @@ class RequestLoggingMiddleware:
                 # Compile payload from request
                 payload = {
                     'path': request.path,
-                    'values': request.GET.dict()
+                    'values': request.POST.dict()
                 }
 
                 # Save the log entry

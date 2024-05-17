@@ -1,12 +1,12 @@
 .row.mt-4.loading
   .col-2.d-flex.justify-content-end
-    #reset.btn.btn-outline-secondary(hx-get="reset" hx-target="#model-container" hx-indicator="#spinner")
+    #reset.btn.btn-outline-secondary(hx-post="reset" hx-target="#model-container" hx-indicator="#spinner")
       span.mdi.mdi-page-first Reset
   .col-4.justify-content-center
     .btn-group(role="group")
-      #add.btn.btn-outline-secondary.rounded-start-2(hx-get="add" hx-target="#model-container" hx-indicator="#spinner" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add one optimal feature") Add
+      #add.btn.btn-outline-secondary.rounded-start-2(hx-post="add" hx-target="#model-container" hx-indicator="#spinner" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add one optimal feature") Add
         span.mdi.mdi-chevron-right
-      #fill.btn.btn-outline-secondary(hx-get="fill" hx-target="#model-container" hx-indicator="#spinner") Fill
+      #fill.btn.btn-outline-secondary(hx-post="fill" hx-target="#model-container" hx-indicator="#spinner") Fill
         span.mdi.mdi-page-last
   .col-6.d-flex.justify-content-end
     .btn-group(role="group")

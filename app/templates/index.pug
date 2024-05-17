@@ -54,6 +54,10 @@ html(lang='en')
 
 
     script.
+      htmx.on('htmx:configRequest', function(event) {
+        event.detail.headers['X-CSRFToken'] = "!{csrf_token}";
+      });
+
       htmx.on("htmx:beforeRequest", function() {
         document.querySelectorAll("#model-container .loading")
         .forEach(e => {
@@ -65,7 +69,7 @@ html(lang='en')
 
       function update_table(event, values){
           values["feature"] = event.target.closest("li").dataset.feature;
-          htmx.ajax("GET", "update-table", {target: "#model-container", values: values });
+          htmx.ajax("POST", "update-table", {target: "#model-container", values: values });
       }
       const add = (event) => update_table(event, {type: "feature", fromList: "unused", toList: "used"});
       const remove = (event) => update_table(event, {type: "feature", fromList: "used", toList: "unused"});
@@ -143,7 +147,7 @@ html(lang='en')
                 if (evt.oldIndex !== evt.newIndex || evt.from.id !== evt.to.id) {
                   // Trigger htmx to send information to the server
                   evt.item.classList.add("ghost")
-                  htmx.ajax("GET", "update-table", {
+                  htmx.ajax("POST", "update-table", {
                     target: "#model-container",
                     values: {
                       type: "feature",

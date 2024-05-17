@@ -24,25 +24,25 @@ def index():
 
 @psl_request
 def update_table(pslparams, request):
-    match request.GET.get("type"):
+    match request.POST.get("type"):
         case "feature":
-            feature_index = int(request.GET.get("feature"))
-            fromlist = request.GET.get("fromList")
-            tolist = request.GET.get("toList")
+            feature_index = int(request.POST.get("feature"))
+            fromlist = request.POST.get("fromList")
+            tolist = request.POST.get("toList")
 
             if fromlist == "used" and tolist == "unused":
                 pslparams.remove_feature(feature_index)
             elif fromlist == "unused" and tolist == "used":
-                to_ = request.GET.get("to", None)
+                to_ = request.POST.get("to", None)
                 to_ = None if to_ is None else int(to_) - 1
                 pslparams.insert_feature(feature_index, to_)
             elif fromlist == tolist == "used":
-                from_ = int(request.GET.get("from")) - 1
-                to_ = int(request.GET.get("to")) - 1
+                from_ = int(request.POST.get("from")) - 1
+                to_ = int(request.POST.get("to")) - 1
                 pslparams.move_feature(from_, to_)
         case "score":
-            feature_index = int(request.GET.get("feature"))
-            diff = int(request.GET.get("diff"))
+            feature_index = int(request.POST.get("feature"))
+            diff = int(request.POST.get("diff"))
             pslparams.update_score(feature_index, diff=diff)
 
 
@@ -70,5 +70,5 @@ def fill(subj, pslparams):
 def updateHistory(request):
     # TODO
     histln = 2
-    name = request.GET.get("saveName") or f"{histln} {datetime.now().isoformat()}"
+    name = request.POST.get("saveName") or f"{histln} {datetime.now().isoformat()}"
     return render(request, "history.pug", None)
