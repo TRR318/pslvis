@@ -1,4 +1,3 @@
-from pathlib import Path
 from django.shortcuts import render, redirect
 from django.conf import settings
 
@@ -51,17 +50,16 @@ def update_table(request, experiment, subject):
                 from_ = int(request.GET.get("from")) - 1
                 to_ = int(request.GET.get("to")) - 1
                 table.move_feature(from_, to_)
-            result = fit_psl(subj.dataset,table.features, table.scores)
         case "score":
             feature_index = int(request.GET.get("feature"))
             diff = int(request.GET.get("diff"))
             table.update_score(feature_index, diff=diff)
-            result = fit_psl(subj.dataset,table.features, table.scores)
-    return render(request, "pslresult.pug", result | dict(historylength=100))
+    return render(request, "pslresult.pug", fit_psl(subj.dataset,table.features, table.scores) | dict(historylength=100))
 
 
 def reset(request, experiment, subject):
-    table = Subject.objects.get(id=subject).last_model
+    subj = Subject.objects.get(id=subject)
+    table = subj.last_model    
     table.reset()
     return render(request, "pslresult.pug", fit_psl(subj.dataset,table.features, table.scores) | dict(historylength=100))
 
@@ -94,7 +92,7 @@ def fit_psl(dataset:Dataset, features=None, scores=None, k="predef"):
 
     # TODO properly get the dataset from the database
     df = pd.read_csv(dataset.path)
-    X = df.iloc[:,:1]
+    X = df.iloc[:,1:]
     y = df.iloc[:,0]
     f = dataset.featurenames
 
