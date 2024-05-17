@@ -1,10 +1,10 @@
-from uuid import uuid4 as uuid
+from secrets import token_urlsafe
 from django.db import models
 from .dataset import Dataset
 
 
 class Experiment(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid, editable=False)
+    id = models.SlugField(primary_key=True, default=token_urlsafe(8), editable=False)
     dataset = models.ForeignKey(
         Dataset,
         verbose_name="Dataset attached to the Experiment",
