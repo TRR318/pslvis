@@ -1,16 +1,20 @@
-from uuid import uuid4 as uuid
+from secrets import token_urlsafe
 from django.db import models
 from .experiment import Experiment
 
 
 class Subject(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid, editable=False)
+    id = models.SlugField(primary_key=True, default=token_urlsafe(8), editable=False)
     experiment = models.ForeignKey(
         Experiment,
         verbose_name="Experiment this subject is part of",
         on_delete=models.CASCADE,
     )
 
+    @property
+    def hist_len(self):
+        return self.models.count()
+    
     @property
     def last_model(self):
         models = self.models.order_by("-updated_at")
