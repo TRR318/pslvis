@@ -11,10 +11,10 @@
             "request": "launch",
             "program": "manage.py",
             "console": "integratedTerminal",
-            "args": ["runserver", "9020"],
+            "args": ["runserver", "9000"],
             "env": {
-                // "ALLOWED_HOSTS": "127.0.0.1",
-                // "CORS_PARENT": "http://127.0.0.1:8000,http://localhost:8000"
+            //    // "ALLOWED_HOSTS": "127.0.0.1",
+            //    // "CORS_PARENT": "http://127.0.0.1:8000,http://localhost:8000"
             }
         },
     ]

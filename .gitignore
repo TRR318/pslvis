@@ -1,14 +1,11 @@
-__pycache__/
 *.py[cod]
 *$py.class
 
 __temp*
-__pycache__/
-*.py[cod]
-
 data/*
 
 venv
 
 */__pycache__/
 dataset/
+/.idea/
