@@ -39,6 +39,7 @@ class PslParam(models.Model):
         on_delete=models.CASCADE,
         related_name="models",
     )
+    name = models.CharField(default="current", max_length=100, blank=True)
     _features = models.JSONField(default=list)
     _scores = models.JSONField(default=dict)
     updated_at = models.DateTimeField(auto_now=True)

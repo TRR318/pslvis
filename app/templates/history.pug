@@ -3,9 +3,5 @@
     h5.offcanvas-title History
   .offcanvas-body
     ul.list-group
-      li.list-group-item.list-group-item-action v1.1
-      li.list-group-item.list-group-item-action v0.6
-      li.list-group-item.list-group-item-action v0.5
-      li.list-group-item.list-group-item-action v0.4
-      li.list-group-item.list-group-item-action v0.3
-      li.list-group-item.list-group-item-action v0.1
+      for model in model_names
+        li.list-group-item.list-group-item-action= model

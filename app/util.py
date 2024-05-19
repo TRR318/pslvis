@@ -10,10 +10,10 @@ from skpsl import ProbabilisticScoringList
 from .models import Dataset, Subject
 
 
-def psl_request(func=None, *, target="pslresult.pug", context=None):
+def psl_request(func=None, *, target="pslresult.pug"):
     def decorate(func):
         @wraps(func)
-        def wrapper(request, ex_id, subj_id):
+        def wrapper(request, subj_id):
             subj = Subject.objects.get(id=subj_id)
             pslparams = subj.last_model
             kwargs_full = dict(subj=subj, pslparams=pslparams, request=request)
@@ -22,13 +22,13 @@ def psl_request(func=None, *, target="pslresult.pug", context=None):
             valid_params = set(sig.parameters.keys())
             filtered_kwargs = {key: value for key, value in kwargs_full.items() if key in valid_params}
 
-            func(**filtered_kwargs)
+            added_context = func(**filtered_kwargs)
             return render(
                 request,
                 target,
                 fit_psl(subj.dataset, pslparams.features, pslparams.scores)
                 | dict(historylength=subj.hist_len)
-                | (context or dict()),
+                | (added_context or dict()),
             )
 
         return wrapper
