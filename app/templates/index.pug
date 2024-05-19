@@ -54,9 +54,7 @@ html(lang='en')
 
 
     script.
-      htmx.on('htmx:configRequest', function(event) {
-        event.detail.headers['X-CSRFToken'] = "!{csrf_token}";
-      });
+      htmx.on('htmx:configRequest', (e) => e.detail.headers['X-CSRFToken'] = "!{csrf_token}");
 
       htmx.on("htmx:beforeRequest", function() {
         document.querySelectorAll("#model-container .loading")

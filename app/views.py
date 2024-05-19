@@ -14,12 +14,12 @@ def create_subject(request, ex_id):
     )
 
     # load index page
-    return redirect(f"{ex_id}/{subj.id}/")
+    return redirect(f"{subj.id}/")
 
 
-@psl_request(target="index.pug", context=dict(standalone=settings.STANDALONE))
-def index():
-    pass
+@psl_request(target="index.pug")
+def index(subj: Subject):
+    return dict(standalone=settings.STANDALONE, model_names=[model.name for model in subj.models.iterator()])
 
 
 @psl_request
@@ -67,8 +67,10 @@ def fill(subj, pslparams):
         pslparams.insert_feature(f, None, s)
 
 
-def updateHistory(request):
-    # TODO
-    histln = 2
-    name = request.POST.get("saveName") or f"{histln} {datetime.now().isoformat()}"
-    return render(request, "history.pug", None)
+def updateHistory(request, subj_id):
+    subj = Subject.objects.get(id=subj_id)
+    name = request.POST.get("saveName") or f"{subj.hist_len} {datetime.now().isoformat()}"
+
+    # TODO copy model
+
+    return render(request, "history.pug", dict(model_names=[model.name for model in subj.models.iterator()]))
