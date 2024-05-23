@@ -10,13 +10,15 @@
         span.mdi.mdi-page-last
   .col-6.d-flex.justify-content-end
     .btn-group(role="group")
-      #save.btn.btn-outline-secondary= "Save "
-        span.mdi.mdi-content-save
-      input#filename.form-control.d-none.rounded-end-0(type="text" placeholder="Save name")
-      #save-confirm.btn.btn-outline-primary.d-none Confirm
+      //#save.btn.btn-outline-secondary= "Save "
+      //  span.mdi.mdi-content-save
+      //.d-none↓
+      form.d-flex
+        input.form-control.rounded-end-0(type="text" name="savename" placeholder="Save name")
+        button#save-confirm.btn.btn-outline-primary.rounded-0(hx-post="save" hx-target="#history" hx-include="[name='savename']") Confirm
       button.btn.btn-outline-secondary.flex-shrink-0(data-bs-toggle="offcanvas" data-bs-target="#history")= "History "
         span.mdi.mdi-history
-        span.badge.text-bg-secondary.rounded-pill.position-absolute.top-0.start-100.translate-middle= historylength
+        span#histlen.badge.text-bg-secondary.rounded-pill.position-absolute.top-0.start-100.translate-middle= historylength
 
 #feature-container.row.mt-3.loading
   .col-2

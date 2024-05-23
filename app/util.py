@@ -1,43 +1,9 @@
-import inspect
-from functools import wraps
-
 import numpy as np
 import pandas as pd
-from django.shortcuts import render
 from sklearn.metrics import roc_auc_score
 from skpsl import ProbabilisticScoringList
 
-from .models import Dataset, Subject
-
-
-def psl_request(func=None, *, target="pslresult.pug"):
-    def decorate(func):
-        @wraps(func)
-        def wrapper(request, subj_id):
-            subj = Subject.objects.get(id=subj_id)
-            pslparams = subj.last_model
-            kwargs_full = dict(subj=subj, pslparams=pslparams, request=request)
-
-            sig = inspect.signature(func)
-            valid_params = set(sig.parameters.keys())
-            filtered_kwargs = {key: value for key, value in kwargs_full.items() if key in valid_params}
-
-            added_context = func(**filtered_kwargs)
-            return render(
-                request,
-                target,
-                fit_psl(subj.dataset, pslparams.features, pslparams.scores)
-                | dict(historylength=subj.hist_len)
-                | (added_context or dict()),
-            )
-
-        return wrapper
-
-    if func is not None and callable(func):
-        # arg contains only a function, we decorate it
-        return decorate(func)
-    else:
-        return decorate
+from .models import Dataset
 
 
 def fit_psl(dataset: Dataset, features=None, scores=None, k="predef"):
@@ -78,9 +44,7 @@ def fit_psl(dataset: Dataset, features=None, scores=None, k="predef"):
                 name="Probas",
             ),
         )
-    ).to_dict("records")[
-            1:
-            ]  # drop stage 0 and convert into list of dicts
+    ).to_dict("records")[1:]  # drop stage 0 and convert into list of dicts
 
     return dict(
         var=unused,

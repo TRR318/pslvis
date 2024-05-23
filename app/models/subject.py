@@ -16,8 +16,16 @@ class Subject(models.Model):
         return self.models.count()
     
     @property
+    def model_dict(self):
+        return {model.id: model.name for model in self.active_models.order_by("-updated_at")}
+
+    @property
+    def active_models(self):
+        return self.models.filter(deleted=False)
+    
+    @property
     def last_model(self):
-        models = self.models.order_by("-updated_at")
+        models = self.active_models.order_by("-updated_at")
         if models:
             return models[0]
         model = PslParam.objects.create(subject=self)
@@ -39,10 +47,15 @@ class PslParam(models.Model):
         on_delete=models.CASCADE,
         related_name="models",
     )
+    deleted = models.BooleanField(default=False)
     name = models.CharField(default="current", max_length=100, blank=True)
     _features = models.JSONField(default=list)
     _scores = models.JSONField(default=dict)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def data(self):
+        return dict(subject=self.subject, _features=self._features, _scores=self._scores)
 
     @property
     def features(self):

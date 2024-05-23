@@ -1,25 +1,56 @@
-from datetime import datetime
+import inspect
+from functools import wraps
 
-from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
-from app.util import fit_psl, psl_request
-from .models import *
+from app.models import Subject
+from app.util import fit_psl
+from pslvis import settings
 
 
-def create_subject(request, ex_id):
-    # create new subject
-    subj = Subject.objects.create(
-        experiment=Experiment.objects.get(id=ex_id),
-    )
+def psl_request(func=None, *, target="pslresult.pug"):
+    def decorate(func):
+        @wraps(func)
+        def wrapper(request, subj_id):
+            subj = Subject.objects.get(id=subj_id)
+            model_id = request.POST.get("modelID")
+            if model_id is None:
+                pslparams = subj.last_model
+            else:
+                pslparams = subj.models.get(model_id)
 
-    # load index page
-    return redirect(f"{subj.id}/")
+            kwargs_full = dict(subj=subj, pslparams=pslparams, request=request)
+
+            sig = inspect.signature(func)
+            valid_params = set(sig.parameters.keys())
+            filtered_kwargs = {key: value for key, value in kwargs_full.items() if key in valid_params}
+
+            added_context = func(**filtered_kwargs)
+            return render(
+                request,
+                target,
+                fit_psl(subj.dataset, pslparams.features, pslparams.scores)
+                | dict(historylength=subj.hist_len)
+                | (added_context or dict()),
+            )
+
+        return wrapper
+
+    if func is not None and callable(func):
+        # arg contains only a function, we decorate it
+        return decorate(func)
+    else:
+        return decorate
 
 
 @psl_request(target="index.pug")
 def index(subj: Subject):
-    return dict(standalone=settings.STANDALONE, model_names=[model.name for model in subj.models.iterator()])
+    return dict(standalone=settings.STANDALONE, models=subj.model_dict)
+
+
+@psl_request
+def get():
+    pass
 
 
 @psl_request
@@ -65,12 +96,3 @@ def fill(subj, pslparams):
     pslparams.reset()
     for f, s in zip(result["features"], result["scores"]):
         pslparams.insert_feature(f, None, s)
-
-
-def updateHistory(request, subj_id):
-    subj = Subject.objects.get(id=subj_id)
-    name = request.POST.get("saveName") or f"{subj.hist_len} {datetime.now().isoformat()}"
-
-    # TODO copy model
-
-    return render(request, "history.pug", dict(model_names=[model.name for model in subj.models.iterator()]))
