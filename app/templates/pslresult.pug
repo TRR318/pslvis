@@ -20,33 +20,33 @@
         span.mdi.mdi-history
         span#histlen.badge.text-bg-secondary.rounded-pill.position-absolute.top-0.start-100.translate-middle= historylength
 
-#feature-container.row.mt-3.loading
+#feature-container.row.mt-3.loading(hx-target="#model-container")
   .col-2
     ul#unused.list-group.text-center
       .fw-bold.list-group-item.p-2 Unused
       each fidx, f in var.items
-        li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle(data-feature=fidx data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=f)= f
-          span.mdi.mdi-plus.btn.btn-sm.p-0.position-absolute.end-0.add.d-none(onclick="add(event)")
+        li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle(data-feature=fidx data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=f hx-vals='js:{"feature": event.target.closest("li").dataset.feature}')= f
+          span.mdi.mdi-plus.btn.btn-sm.p-0.position-absolute.end-0.add.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "unused", "toList": "used"}')
   .col-10
     ul#used.list-group.text-center
       .fw-bold.list-group-item.d-flex.p-0
-        .cell.col-3.p-2.text-truncate Features
-        .cell.col-1.border-start.p-2.text-truncate Scores
+        .col-3.p-2.text-truncate Features
+        .col-1.border-start.p-2.text-truncate Scores
         for head in headings
-          .cell.col.border-start.p-2.text-truncate= head
+          .col.border-start.p-2.text-truncate= head
       each row in rows
-        li.list-group-item.list-group-item-action.d-flex.p-0(data-feature=row["fidx"] data-threshold=row["thresh"])
+        li.list-group-item.list-group-item-action.d-flex.p-0(data-feature=row["fidx"] data-threshold=row["thresh"] hx-vals='js:{"feature": event.target.closest("li").dataset.feature}')
           // we could also add additional data into the datafield. such as the threshold
-          .cell.label.col.col-3.p-2.text-truncate.draghandle.position-relative(data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=row["fname"]+row["thresh"])= row.fname
+          .label.col.col-3.p-2.text-truncate.draghandle.position-relative(data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=row["fname"]+row["thresh"])= row.fname
             if row.thresh != ""
               = row.thresh
-            span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none(onclick="remove(event)")
-          .cellcol.col-1.border-start.p-2.text-truncate.d-flex.justify-content-around.align-items-center
-            span.mdi.mdi-minus.btn.btn-sm.p-0.decr(onclick="score(event, -1)")
+            span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "used", "toList": "unused"}')
+          .col.col-1.border-start.p-2.text-truncate.d-flex.justify-content-around.align-items-center(hx-vals='{"type":"score"}')
+            span.mdi.mdi-minus.btn.btn-sm.p-0(hx-post="update-table" hx-vals='{"diff":-1}')
             = row.score
-            span.mdi.mdi-plus.btn.btn-sm.p-0.incr(onclick="score(event, 1)")
+            span.mdi.mdi-plus.btn.btn-sm.p-0(hx-post="update-table" hx-vals='{"diff":1}')
           each val in row.probas
-            .cell.col.border-start.pt-2.pb-2.text-truncate= val
+            .col.border-start.pt-2.pb-2.text-truncate= val
 
 script.
   labels = !{labels};
