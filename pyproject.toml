@@ -11,7 +11,8 @@ django = "^5.0.4"
 django-htmx = "^1.17.3"
 django-tables2 = "^2.7.0"
 scikit-psl = { git = "https://github.com/TRR318/scikit-psl.git", branch = "feature/visualize_psl" }
-pypugjs = "^5.9.12"
+pypugjs = { git = "https://github.com/stheid/pypugjs.git" }
+#pypugjs = "^5.9.13"
 numpy = "^1.26.4"
 scikit-learn = "^1.4.2"
 gunicorn = "^22.0.0"

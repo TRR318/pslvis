@@ -1,7 +1,6 @@
-#history.offcanvas.offcanvas-end(tabindex="-1")
-  .offcanvas-header
-    h5.offcanvas-title History
-  .offcanvas-body
-    ul.list-group
-      for model in model_names
-        li.list-group-item.list-group-item-action= model
+.offcanvas-header
+  h5.offcanvas-title History
+.offcanvas-body
+  ul#hist-entries.list-group
+    for id, name in models.items
+      li.list-group-item.list-group-item-action()= name
