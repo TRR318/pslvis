@@ -108,7 +108,7 @@ html(lang='en')
         //////////////////
         const observer = new MutationObserver(function (mutations) {
           mutations.forEach(function (mutation) {
-            mutation.target.querySelectorAll(".cell.label").forEach(elem => {
+            mutation.target.querySelectorAll("li .label").forEach(elem => {
             if (mutation.target.classList.contains('ghost')) {
               elem.classList.remove("col-3");
             } else {
@@ -197,7 +197,7 @@ html(lang='en')
         //saveConfirmButton.addEventListener('click', saveHistory);
       }
 
-      htmx.on('DOMContentLoaded', initialize);
+      document.addEventListener('DOMContentLoaded', initialize);
 
       htmx.on('htmx:configRequest', e => e.detail.headers['X-CSRFToken'] = "!{csrf_token}");
 
