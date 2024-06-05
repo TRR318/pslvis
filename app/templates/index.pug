@@ -1,3 +1,5 @@
+{% load static %}
+
 doctype html
 html(lang='en')
   head
@@ -54,8 +56,18 @@ html(lang='en')
         display: inline-block !important;
       }
 
+    script(type="module" src="{% static 'js/initialize.js' %}")
 
     script.
+      htmx.on("htmx:beforeRequest", function() {
+        document.querySelectorAll("#model-container .loading")
+        .forEach(e => {
+          htmx.addClass(e, "opacity-25");
+          e.style.pointerEvents = "none";
+          e.style.userSelect = "none";
+        });
+      });
+
       function update_table(event, values){
           values["feature"] = event.target.closest("li").dataset.feature;
           htmx.ajax("POST", "update-table", {target: "#model-container", values: values });
@@ -130,7 +142,7 @@ html(lang='en')
             new Sortable(ul, {
               animation:150,
               group: "features",
-              ghostClass: "ghost",	
+              ghostClass: "ghost",
               handle: ".draghandle",
               onEnd: function(evt) {
                 if (evt.oldIndex !== evt.newIndex || evt.from.id !== evt.to.id) {
@@ -220,5 +232,5 @@ html(lang='en')
           //restoreSaveButton();
         }
       });
-      
+
       htmx.on('htmx:afterSettle', initialize);

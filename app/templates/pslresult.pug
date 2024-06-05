@@ -46,7 +46,7 @@
             = row.score
             span.mdi.mdi-plus.btn.btn-sm.p-0(hx-post="update-table" hx-vals='{"diff":1}')
           each val in row.probas
-            .col.border-start.pt-2.pb-2.text-truncate= val
+            .col.border-start.pt-2.pb-2.text-truncate.proba-cell= val
 
 script.
   labels = !{labels};
