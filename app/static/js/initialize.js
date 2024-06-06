@@ -1,5 +1,4 @@
 import { sortableStaff } from "./sortable_staff.js";
-import { history } from "./history.js";
 import { heatmap } from "./heatmap.js";
 
 function initialize() {
@@ -15,8 +14,6 @@ function initialize() {
     chart.update();
 
     sortableStaff();
-
-    history();
 
     heatmap();
 }

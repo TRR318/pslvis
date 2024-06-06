@@ -3,7 +3,7 @@ from functools import wraps
 
 from django.shortcuts import render
 
-from app.models import Subject
+from app.models import Subject, PslParam
 from app.util import fit_psl
 from pslvis import settings
 
@@ -11,13 +11,14 @@ from pslvis import settings
 def psl_request(func=None, *, target="pslresult.pug"):
     def decorate(func):
         @wraps(func)
-        def wrapper(request, subj_id):
+        def wrapper(request, subj_id, **kwargs):
             subj = Subject.objects.get(id=subj_id)
-            model_id = request.POST.get("modelID")
+
+            model_id = kwargs.get("model_id") or request.POST.get("modelID")
             if model_id is None:
                 pslparams = subj.last_model
             else:
-                pslparams = subj.models.get(model_id)
+                pslparams = PslParam.objects.get(id=model_id)
 
             kwargs_full = dict(subj=subj, pslparams=pslparams, request=request)
 

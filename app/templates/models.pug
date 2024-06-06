@@ -1,0 +1,10 @@
+.offcanvas-header
+  h5.offcanvas-title History
+.offcanvas-body
+  ul.list-group
+    for id, name in models.items
+      li.list-group-item.list-group-item-action(hx-get="model/#{id}" hx-target="#model-container")
+        = name
+        .p-0.position-absolute.end-0.remove.d-none(hx-target="#models")
+          span.mdi.mdi-content-copy.btn.btn-sm(hx-put="model/#{id}")
+          span.mdi.mdi-delete.btn.btn-sm(hx-delete="model/#{id}")
