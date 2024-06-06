@@ -15,7 +15,7 @@ class Subject(models.Model):
 
     @property
     def hist_len(self):
-        return self.models.count()
+        return self.active_models.count()
 
     @property
     def model_dict(self):
@@ -81,6 +81,10 @@ class PslParam(models.Model):
             self._scores = {}
         else:
             self._scores = value
+        self.save()
+
+    def hide(self):
+        self.deleted = True
         self.save()
 
     def insert_feature(self, feature, pos=None, score=1):

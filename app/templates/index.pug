@@ -30,8 +30,8 @@ html(lang='en')
                 span.mdi.mdi-github.fs-4.btn.btn-sm
                 span Visualization
 
-    #history.offcanvas.offcanvas-end(tabindex="-1")
-      include history.pug
+    #models.offcanvas.offcanvas-end(tabindex="-1")
+      include models.pug
 
     .container.mt-5
       .row
@@ -59,15 +59,6 @@ html(lang='en')
     script(type="module" src="{% static 'js/initialize.js' %}")
 
     script.
-      htmx.on("htmx:beforeRequest", function() {
-        document.querySelectorAll("#model-container .loading")
-        .forEach(e => {
-          htmx.addClass(e, "opacity-25");
-          e.style.pointerEvents = "none";
-          e.style.userSelect = "none";
-        });
-      });
-
       function update_table(event, values){
           values["feature"] = event.target.closest("li").dataset.feature;
           htmx.ajax("POST", "update-table", {target: "#model-container", values: values });
@@ -118,8 +109,8 @@ html(lang='en')
       });
 
       htmx.on("htmx:afterSwap", evt =>{
-        if (evt.detail.target.id == "history"){
-          document.getElementById("histlen").innerHTML = document.querySelectorAll("#hist-entries li").length;
+        if (evt.detail.target.id == "models"){
+          document.getElementById("n-models").innerHTML = document.querySelectorAll("#models ul li").length;
           //restoreSaveButton();
         }
       });
