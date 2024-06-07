@@ -4,6 +4,7 @@ import { heatmap } from "./heatmap.js";
 function initialize() {
     // Send height to iframe parent
     window.parent.postMessage({ height: document.body.scrollHeight }, '*');
+    window.onload = () => window.parent.postMessage({ new_url: window.location.href }, '*');
 
     // fix to delete orphaned tooltips
     document.querySelectorAll(".tooltip.bs-tooltip-auto").forEach(e => e.remove())
