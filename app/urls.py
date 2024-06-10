@@ -18,7 +18,7 @@ urlpatterns = [
         path('<subj_id>/add', views.add, name='add'),
         path('<subj_id>/fill', views.fill, name='fill'),
 
-        #path('<subj_id>/save', views.save_model, name='save'),
+        path('<subj_id>/save', views.save_model, name='save'),
         path('<subj_id>/model/<model_id>', ModelHandler.as_view(), name='model'),
 
         # TODO allow deleting models by a delete request. it will actually only be marked as "deleted" and not removed from db
