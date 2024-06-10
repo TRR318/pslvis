@@ -49,9 +49,17 @@ def index(subj: Subject):
     return dict(standalone=settings.STANDALONE, models=subj.model_dict)
 
 
-@psl_request
-def get():
-    pass
+def get(request, subj_id):
+    subj = Subject.objects.get(id=subj_id)
+    latest_model = subj.last_model
+
+    pslparams = PslParam.objects.get(id=latest_model.id)
+
+    return render(
+        request,
+        'getmodel.pug',
+        fit_psl(subj.dataset, pslparams.features, pslparams.scores)
+    )
 
 
 @psl_request
