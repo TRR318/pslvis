@@ -36,3 +36,18 @@ class ModelHandler(View):
         PslParam.objects.get(id=model_id).hide()
         subj = Subject.objects.get(id=subj_id)
         return render(request, "models.pug", dict(models=subj.model_dict))
+
+
+def save_model(request, subj_id):
+    subj = Subject.objects.get(id=subj_id)
+    name = request.POST.get("name")
+    # check if there is already model with the same name
+    if PslParam.objects.filter(name=name).exists():
+        return render("Model with this name already exists", status=400)
+
+    # i think we need to create two models here, the one that is needed for history and then one that is using currently
+    PslParam.objects.create(**(dict(name=name) | subj.last_model.data))
+    PslParam.objects.create(**(dict(name="current") | subj.last_model.data))
+
+    historylength = subj.hist_len
+    return render(request, "historybutton.pug", dict(historylength=historylength))
