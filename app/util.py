@@ -28,6 +28,7 @@ def fit_psl(dataset: Dataset, features=None, scores=None, k="predef"):
 
     table = pd.DataFrame(
         dict(
+            i=list(range(len(df.index))),
             # calculate feature index
             fidx=psl.inspect()["Feature Index"].map(
                 lambda v: "" if np.isnan(v) else f"{v:.0f}"
