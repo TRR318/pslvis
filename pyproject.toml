@@ -17,6 +17,7 @@ scikit-learn = "^1.4.2"
 gunicorn = "^22.0.0"
 django-cors-headers = "^4.3.1"
 dj-database-url = "^2.2.0"
+psycopg2 = "^2.9.9"
 
 
 [build-system]
