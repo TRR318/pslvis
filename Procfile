@@ -1,1 +1,1 @@
-web: gunicorn pslvis.wsgi.wsgi
+web: gunicorn pslvis.wsgi --log-file -
