@@ -72,7 +72,7 @@ html(lang='en')
         data: {
           labels: labels,
           datasets: [{
-            label: 'ROC area under curve per stage',
+            label: 'RoC AuC pro Stufe',
             borderColor: 'rgb(75, 192, 192)',
             data: data,
           }],
@@ -115,12 +115,5 @@ html(lang='en')
                 userSelect: "none"
               });
             });
-        }
-      });
-
-      htmx.on("htmx:afterSwap", evt =>{
-        if (evt.detail.target.id == "models"){
-          document.getElementById("n-models").innerHTML = document.querySelectorAll("#models ul li").length;
-          //restoreSaveButton();
         }
       });
