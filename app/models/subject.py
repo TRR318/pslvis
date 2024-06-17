@@ -4,9 +4,12 @@ from django.db import models
 
 from .experiment import Experiment
 
+def generate_unique_slug():
+    return token_urlsafe(4)
+
 
 class Subject(models.Model):
-    id = models.SlugField(primary_key=True, default=lambda: token_urlsafe(8), editable=False)
+    id = models.SlugField(primary_key=True, default=generate_unique_slug, editable=False)
     experiment = models.ForeignKey(
         Experiment,
         verbose_name="Experiment this subject is part of",
