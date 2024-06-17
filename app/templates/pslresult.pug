@@ -9,9 +9,6 @@
       #fill.btn.btn-outline-secondary(hx-post="fill" hx-target="#model-container" hx-indicator="#spinner") Fill
         span.mdi.mdi-page-last
   .col-6.d-flex.justify-content-end
-    form.px-1.d-flex.justify-content-end(hx-post="save" hx-trigger="submit" hx-target="#history-button" hx-target-4*="#aa" hx-indicator="#spinner")
-        input#name.form-control.w-50(type="text" name="name" placeholder="Enter model name" required)
-        button.mx-1.btn.btn-primary(type="submit") Save Model
     .btn-group(role="group")#history-button
       include historybutton.pug
 

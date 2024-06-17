@@ -1,13 +1,24 @@
+from functools import wraps
+
 import numpy as np
 import pandas as pd
+from django.core.cache import cache
 from sklearn.metrics import roc_auc_score
 from skpsl import ProbabilisticScoringList
 
 from .models import Dataset
 
 
+def psl_cache(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return cache.get_or_set(hash(repr(args) + repr(sorted(kwargs.items()))), lambda: func(*args, **kwargs))
+
+    return wrapper
+
+
+@psl_cache
 def fit_psl(dataset: Dataset, features=None, scores=None, k="predef"):
-    # TODO use caching i.e. the PslResults table
     df = pd.read_csv(dataset.path)
     X = df.iloc[:, 1:]
     y = df.iloc[:, 0]
