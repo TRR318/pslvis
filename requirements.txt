@@ -516,7 +516,7 @@ scikit-learn==1.5.0 ; python_version >= "3.11" and python_version < "3.13" \
     --hash=sha256:d82c2e573f0f2f2f0be897e7a31fcf4e73869247738ab8c3ce7245549af58ab8 \
     --hash=sha256:df8ccabbf583315f13160a4bb06037bde99ea7d8211a69787a6b7c5d4ebb6fc3 \
     --hash=sha256:f405c4dae288f5f6553b10c4ac9ea7754d5180ec11e296464adb5d6ac68b6ef5
-scikit-psl @ git+https://github.com/TRR318/scikit-psl.git@f72741172d04965b88fd930bdff21524a5f390ed ; python_version >= "3.11" and python_version < "3.13"
+scikit-psl --no-deps @ git+https://github.com/TRR318/scikit-psl.git@f72741172d04965b88fd930bdff21524a5f390ed ; python_version >= "3.11" and python_version < "3.13"
 scipy==1.13.1 ; python_version >= "3.11" and python_version < "3.13" \
     --hash=sha256:017367484ce5498445aade74b1d5ab377acdc65e27095155e448c88497755a5d \
     --hash=sha256:095a87a0312b08dfd6a6155cbbd310a8c51800fc931b8c0b84003014b874ed3c \
