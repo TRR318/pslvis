@@ -19,7 +19,8 @@ def psl_cache(func):
 
 @psl_cache
 def fit_psl(dataset: Dataset, features=None, scores=None, k="predef"):
-    df = pd.read_csv(dataset.path)
+    # df = pd.read_csv(dataset.path)
+    df = pd.DataFrame(dataset.filecontent)
     X = df.iloc[:, 1:]
     y = df.iloc[:, 0]
     f = dataset.featurenames
