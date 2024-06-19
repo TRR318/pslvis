@@ -25,19 +25,3 @@ class Dataset(models.Model):
 
     def __str__(self):
         return self.friendlyname
-
-    def clean(self):
-        super().clean()
-        filecontent = self.filecontent
-        if isinstance(filecontent, list) and filecontent:
-            df = pd.DataFrame(filecontent)
-            n_features = df.shape[1] - 1
-
-            if len(self.featurenames) != n_features:
-                raise ValidationError(
-                    f"The featurenames list (len={len(self.featurenames)}) must be one shorter than the column count "
-                    f"({n_features}) of the CSV. Note that the first column is interpreted as the target variable."
-                )
-
-            if not set(df.iloc[:, 0]) <= {0, 1}:
-                raise ValidationError("Column one must be the target column and only contain 0 and 1 values")
