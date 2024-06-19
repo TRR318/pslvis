@@ -46,7 +46,7 @@ class DatasetForm(forms.ModelForm):
                 raise ValidationError("Column one must be the target column and only contain 0 and 1 values")
 
             file.seek(0)
-            json_content = df.to_dict(orient='records')
+            json_content = df.to_dict(orient='split')
             return json_content
         except pd.errors.EmptyDataError:
             raise ValidationError("Dataset appears to be empty")
