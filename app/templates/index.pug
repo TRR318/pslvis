@@ -39,11 +39,10 @@ html(lang='en')
           h4 Interactive PSL
           p Merkmale können durch verschieben Merkmale zum Modell hinzufügen und die Reihenfolge ändern.
           p Die Grafik in der rechten oberen Ecke visualisiert die Performance des erstellten Modells.
-          //p Predict the presence of breast cancer. Which features would be most influencial?
-          p Ziel ist ein Modell zu konstruieren das möglichst präzise einen Studienabbruch vorhersagen kann.
+          //- p Ziel ist ein Modell zu konstruieren das möglichst präzise einen Studienabbruch vorhersagen kann.
         .col-sm-6.offset-lg-4.col-lg-4
-          canvas#chart(height="180px")
-    #model-container.container.mt-5
+          canvas#chart(height="220px")
+    #model-container.container.mt-4
       include pslresult.pug
     #spinner.position-fixed.top-50.start-50.spinner-border.htmx-indicator
       
