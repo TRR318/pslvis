@@ -25,7 +25,7 @@ def fit_psl(dataset: Dataset, features=None, scores=None, k="predef"):
     y = df.iloc[:, 0]
     f = dataset.featurenames
 
-    psl = ProbabilisticScoringList({-1, 1, 2})
+    psl = ProbabilisticScoringList({-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5})
     scores = [scores[f_] for f_ in features]
     psl.fit(X, y, predef_features=features, predef_scores=scores, k=k)
     df = psl.inspect(feature_names=f)
