@@ -37,12 +37,12 @@ html(lang='en')
       .row
         .col-sm-6.col-lg-4
           h4 Interactive PSL
-          p You can drag and drop features from left to right and observe how the performance changes
-          //p Predict the presence of breast cancer. Which features would be most influencial?
-          p Predict whether a student is likely to drop out of university. Which features would be most influencial?
+          p Merkmale können durch verschieben Merkmale zum Modell hinzufügen und die Reihenfolge ändern.
+          p Die Grafik in der rechten oberen Ecke visualisiert die Performance des erstellten Modells.
+          //- p Ziel ist ein Modell zu konstruieren das möglichst präzise einen Studienabbruch vorhersagen kann.
         .col-sm-6.offset-lg-4.col-lg-4
-          canvas#chart(height="180px")
-    #model-container.container.mt-5
+          canvas#chart(height="220px")
+    #model-container.container.mt-4
       include pslresult.pug
     #spinner.position-fixed.top-50.start-50.spinner-border.htmx-indicator
       
@@ -72,7 +72,7 @@ html(lang='en')
         data: {
           labels: labels,
           datasets: [{
-            label: 'ROC area under curve per stage',
+            label: 'RoC AuC pro Stufe',
             borderColor: 'rgb(75, 192, 192)',
             data: data,
           }],
@@ -83,6 +83,16 @@ html(lang='en')
               beginAtZero: false,
               min: 0.5,   // Set the minimum value of the y-axis
               max: 1.02,   // Set the maximum value of the y-axis
+              title: {
+                display: true,
+                text: 'Model Performance'  // Y-axis label
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Anzahl der Merkmale'  // X-axis label
+              }
             }
           },
           animation: {
@@ -105,12 +115,5 @@ html(lang='en')
                 userSelect: "none"
               });
             });
-        }
-      });
-
-      htmx.on("htmx:afterSwap", evt =>{
-        if (evt.detail.target.id == "models"){
-          document.getElementById("n-models").innerHTML = document.querySelectorAll("#models ul li").length;
-          //restoreSaveButton();
         }
       });

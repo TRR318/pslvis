@@ -1,19 +1,31 @@
+from functools import wraps
+
 import numpy as np
 import pandas as pd
+from django.core.cache import cache
 from sklearn.metrics import roc_auc_score
 from skpsl import ProbabilisticScoringList
 
 from .models import Dataset
 
 
+def psl_cache(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return cache.get_or_set(hash(repr(args) + repr(sorted(kwargs.items()))), lambda: func(*args, **kwargs))
+
+    return wrapper
+
+
+@psl_cache
 def fit_psl(dataset: Dataset, features=None, scores=None, k="predef"):
-    # TODO use caching i.e. the PslResults table
-    df = pd.read_csv(dataset.path)
+    # df = pd.read_csv(dataset.path)
+    df = pd.DataFrame(**dataset.filecontent)
     X = df.iloc[:, 1:]
     y = df.iloc[:, 0]
     f = dataset.featurenames
 
-    psl = ProbabilisticScoringList({-1, 1, 2})
+    psl = ProbabilisticScoringList({-3, -2, -1, 0, 1, 2, 3})
     scores = [scores[f_] for f_ in features]
     psl.fit(X, y, predef_features=features, predef_scores=scores, k=k)
     df = psl.inspect(feature_names=f)
@@ -28,6 +40,7 @@ def fit_psl(dataset: Dataset, features=None, scores=None, k="predef"):
 
     table = pd.DataFrame(
         dict(
+            i=list(range(len(df.index))),
             # calculate feature index
             fidx=psl.inspect()["Feature Index"].map(
                 lambda v: "" if np.isnan(v) else f"{v:.0f}"

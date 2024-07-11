@@ -1,40 +1,39 @@
 .row.mt-4.loading
   .col-2.d-flex.justify-content-end
     #reset.btn.btn-outline-secondary(hx-post="reset" hx-target="#model-container" hx-indicator="#spinner")
-      span.mdi.mdi-page-first Reset
+      span.mdi.mdi-page-first Zurücksetzen
   .col-4.justify-content-center
     .btn-group(role="group")
-      #add.btn.btn-outline-secondary.rounded-start-2(hx-post="add" hx-target="#model-container" hx-indicator="#spinner" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add one optimal feature") Add
+      #add.btn.btn-outline-secondary.rounded-start-2(hx-post="add" hx-target="#model-container" hx-indicator="#spinner" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add one optimal feature") Automatisch hinzufügen
         span.mdi.mdi-chevron-right
-      #fill.btn.btn-outline-secondary(hx-post="fill" hx-target="#model-container" hx-indicator="#spinner") Fill
+      //#fill.btn.btn-outline-secondary(hx-post="fill" hx-target="#model-container" hx-indicator="#spinner") Fill
         span.mdi.mdi-page-last
-  .col-6.d-flex.justify-content-end
-    .btn-group(role="group")
-      button.btn.btn-outline-secondary.flex-shrink-0(data-bs-toggle="offcanvas" data-bs-target="#models")= "Models "
-        span.mdi.mdi-history
-        span#n-models.badge.text-bg-secondary.rounded-pill.position-absolute.top-0.start-100.translate-middle= historylength
+  //.col-6.d-flex.justify-content-end
+    .btn-group(role="group")#history-button
+      include historybutton.pug
 
 #feature-container.row.mt-3.loading(hx-target="#model-container")
   .col-2
     ul#unused.list-group.text-center
-      .fw-bold.list-group-item.p-2 Unused
+      .fw-bold.list-group-item.p-2 Unbenutzt
       each fidx, f in var.items
-        li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle(data-feature=fidx data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=f hx-vals='js:{"feature": event.target.closest("li").dataset.feature}')= f
+        li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle.hand-cursor(data-feature=fidx data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=f hx-vals='js:{"feature": event.target.closest("li").dataset.feature}')= f
           span.mdi.mdi-plus.btn.btn-sm.p-0.position-absolute.end-0.add.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "unused", "toList": "used"}')
   .col-10
     ul#used.list-group.text-center
       .fw-bold.list-group-item.d-flex.p-0
-        .col-3.p-2.text-truncate Features
-        .col-1.border-start.p-2.text-truncate Scores
+        .col-3.p-2.text-truncate Merkmal
+        .col-1.border-start.p-2.text-truncate Score
         for head in headings
           .col.border-start.p-2.text-truncate= head
       each row in rows
         li.list-group-item.list-group-item-action.d-flex.p-0(data-feature=row["fidx"] data-threshold=row["thresh"] hx-vals='js:{"feature": event.target.closest("li").dataset.feature}')
           // we could also add additional data into the datafield. such as the threshold
-          .label.col.col-3.p-2.text-truncate.draghandle.position-relative(data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=row["fname"]+row["thresh"])= row.fname
+          span.badge.rounded-pill.text-bg-light.position-absolute.top-50.start-0.translate-middle= row.i
+          .label.col.col-3.p-2.text-truncate.draghandle.hand-cursor.position-relative(data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=row["fname"]+row["thresh"])= row.fname
             if row.thresh != ""
               = row.thresh
-            span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "used", "toList": "unused"}')
+            span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "used", "toList": "unused"}' hx-indicator="#spinner")
           .col.col-1.border-start.p-2.text-truncate.d-flex.justify-content-around.align-items-center(hx-vals='{"type":"score"}')
             span.mdi.mdi-minus.btn.btn-sm.p-0(hx-post="update-table" hx-vals='{"diff":-1}')
             = row.score
@@ -45,3 +44,9 @@
 script.
   labels = !{labels};
   data = !{metric};
+
+
+style.
+  .hand-cursor{
+    cursor: pointer;
+  }

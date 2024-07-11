@@ -2,9 +2,11 @@ from secrets import token_urlsafe
 from django.db import models
 from .dataset import Dataset
 
+def generate_unique_slug():
+    return token_urlsafe(4)
 
 class Experiment(models.Model):
-    id = models.SlugField(primary_key=True, default=lambda: token_urlsafe(4), editable=False)
+    id = models.SlugField(primary_key=True, default=generate_unique_slug, editable=False)
     dataset = models.ForeignKey(
         Dataset,
         verbose_name="Dataset attached to the Experiment",
