@@ -49,7 +49,7 @@ def index(subj: Subject):
     return dict(standalone=settings.STANDALONE, models=subj.model_dict)
 
 
-@psl_request
+@psl_request(target="getmodel.pug")
 def get():
     pass
 

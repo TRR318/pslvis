@@ -16,6 +16,10 @@ numpy = "^1.26.4"
 scikit-learn = "^1.4.2"
 gunicorn = "^22.0.0"
 django-cors-headers = "^4.3.1"
+dj-database-url = "^2.2.0"
+psycopg2 = "^2.9.9"
+whitenoise = "^6.6.0"
+ipykernel = "^6.29.4"
 
 
 [build-system]
