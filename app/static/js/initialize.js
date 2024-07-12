@@ -10,11 +10,11 @@ function initialize() {
     document.querySelectorAll(".tooltip.bs-tooltip-auto").forEach(e => e.remove())
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tr => new bootstrap.Tooltip(tr))
 
-    if ("chart" in window) {
-        chart.data.labels = labels;
-        chart.data.datasets[0].data = data;
-        chart.update();
-    }
+    // if ("chart" in window) {
+    //     chart.data.labels = labels;
+    //     chart.data.datasets[0].data = data;
+    //     chart.update();
+    // }
 
     sortableStaff();
 
