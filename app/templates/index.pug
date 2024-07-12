@@ -67,41 +67,41 @@ html(lang='en')
       const remove = (event) => update_table(event, {type: "feature", fromList: "used", toList: "unused"});
       const score = (event, diff) => update_table(event, {type: "score", diff: diff});
       
-      const chart = new Chart(document.querySelector("#chart").getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'RoC AuC pro Stufe',
-            borderColor: 'rgb(75, 192, 192)',
-            data: data,
-          }],
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: false,
-              min: 0.5,   // Set the minimum value of the y-axis
-              max: 1.02,   // Set the maximum value of the y-axis
-              title: {
-                display: true,
-                text: 'Model Performance'  // Y-axis label
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: 'Anzahl der Merkmale'  // X-axis label
-              }
-            }
-          },
-          animation: {
-            duration: 0
-          },
-          responsive: true,
-          maintainAspectRatio: false,
-        }
-      });
+      //- const chart = new Chart(document.querySelector("#chart").getContext('2d'), {
+      //-   type: 'line',
+      //-   data: {
+      //-     labels: labels,
+      //-     datasets: [{
+      //-       label: 'RoC AuC pro Stufe',
+      //-       borderColor: 'rgb(75, 192, 192)',
+      //-       data: data,
+      //-     }],
+      //-   },
+      //-   options: {
+      //-     scales: {
+      //-       y: {
+      //-         beginAtZero: false,
+      //-         min: 0.5,   // Set the minimum value of the y-axis
+      //-         max: 1.02,   // Set the maximum value of the y-axis
+      //-         title: {
+      //-           display: true,
+      //-           text: 'Model Performance'  // Y-axis label
+      //-         }
+      //-       },
+      //-       x: {
+      //-         title: {
+      //-           display: true,
+      //-           text: 'Anzahl der Merkmale'  // X-axis label
+      //-         }
+      //-       }
+      //-     },
+      //-     animation: {
+      //-       duration: 0
+      //-     },
+      //-     responsive: true,
+      //-     maintainAspectRatio: false,
+      //-   }
+      //- });
 
       htmx.on('htmx:configRequest', e => e.detail.headers['X-CSRFToken'] = "!{csrf_token}");
 
@@ -117,3 +117,18 @@ html(lang='en')
             });
         }
       });
+
+      function createLastProbas() {
+        probaCells = document.querySelectorAll("#used li:last-child .proba-cell");
+        lastProbas = document.querySelector("#lastprobas");
+        probaCells.forEach(cell => {
+          cell.classList.remove("d-none");
+          lastProbas.appendChild(cell);
+        });
+      }
+
+      htmx.on("htmx:afterRequest", evt => {
+        createLastProbas();
+      });
+
+      document.addEventListener("DOMContentLoaded", createLastProbas);
