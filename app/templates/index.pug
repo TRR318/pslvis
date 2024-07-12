@@ -117,18 +117,3 @@ html(lang='en')
             });
         }
       });
-
-      function createLastProbas() {
-        probaCells = document.querySelectorAll("#used li:last-child .proba-cell");
-        lastProbas = document.querySelector("#lastprobas");
-        probaCells.forEach(cell => {
-          cell.classList.remove("d-none");
-          lastProbas.appendChild(cell);
-        });
-      }
-
-      htmx.on("htmx:afterRequest", evt => {
-        createLastProbas();
-      });
-
-      document.addEventListener("DOMContentLoaded", createLastProbas);

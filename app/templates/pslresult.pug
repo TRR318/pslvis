@@ -12,7 +12,7 @@
     .btn-group(role="group")#history-button
       include historybutton.pug
   .col-2
-  .col-4.d-flex.justify-content-end Model Genauigkeit:
+  .col-4.d-flex.justify-content-end#accuracy-div Model Genauigkeit:
     span#accuracy.fw-bold
 
 #feature-container.row.mt-3.loading(hx-target="#model-container")
@@ -36,7 +36,7 @@
           .label.col.col-9.p-2.text-truncate.draghandle.hand-cursor.position-relative(data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=row["fname"]+row["thresh"])= row.fname
             if row.thresh != ""
               = row.thresh
-            span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "used", "toList": "unused"}' hx-indicator="#spinner")
+            span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "used", "toList": "unused"}' hx-indicator="#spinner")r
           .col.col-3.border-start.p-2.text-truncate.d-flex.justify-content-around.align-items-center(hx-vals='{"type":"score"}')
             span.mdi.mdi-minus.btn.btn-sm.p-0(hx-post="update-table" hx-vals='{"diff":-1}')
             = row.score
@@ -49,7 +49,7 @@
       .fw-bold.list-group-item.d-flex.p-0
         for head in headings
           .col.border-start.p-2.text-truncate= head
-      #lastprobas.list-group-item.d-flex.p-0
+      #lastprobas.d-flex.p-0
 
 script.
   labels = !{labels};
@@ -57,6 +57,21 @@ script.
 
   lastStagePerformance = data[data.length - 1]
   document.querySelector("#accuracy").innerHTML = "&nbsp;" + (lastStagePerformance * 100).toFixed(0) + "%";
+
+  document.querySelectorAll("#used li:last-child .proba-cell").forEach(cell => {
+    cell.classList.remove("d-none");
+    document.querySelector("#lastprobas").appendChild(cell);
+  });
+
+  if (document.querySelectorAll("#lastprobas .proba-cell").length == 0) {
+    document.querySelector("#laststage").style.display = "none";
+    document.querySelector("#accuracy-div").classList.remove("d-flex");
+    document.querySelector("#accuracy-div").classList.add("d-none");
+  } else {
+    document.querySelector("#laststage").style.display = "block";
+    document.querySelector("#accuracy-div").classList.remove("d-none");
+    document.querySelector("#accuracy-div").classList.add("d-flex");
+  }
 
 style.
   .hand-cursor{
