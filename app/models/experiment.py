@@ -12,6 +12,7 @@ class Experiment(models.Model):
         verbose_name="Dataset attached to the Experiment",
         on_delete=models.CASCADE,
     )
+    params = models.JSONField(verbose_name="Additional Experient Parameters", blank=True, default=dict)
 
     internal_name = models.CharField(max_length=100, blank=True)
 

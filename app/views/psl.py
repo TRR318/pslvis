@@ -49,9 +49,29 @@ def index(subj: Subject):
     return dict(standalone=settings.STANDALONE, models=subj.model_dict)
 
 
-@psl_request(target="getmodel.pug")
+@psl_request(target="model_as_table.pug")
 def get():
     pass
+
+@psl_request(target="model_as_tree.pug")
+def gettree():
+    s = """
+    flowchart TD
+        1(0) --> B(0)
+        1 --> |W>70| C(2)
+        B --> BA(0)
+        B --> |m| BB(1)
+        C --> CA(2)
+        C --> |m| CB(3)
+        BA --> BAA(0<br>3%)
+        BA --> |a>27| BAB(2<br>21%)
+        BB --> BBA(1<br>5%)
+        BB --> |a>27| BBB(3<br>23%)
+        CA --> CAA(2<br>21%)
+        CA --> |a>27| CAB(4<br>23%)
+        CB --> CBA(3<br>23%)
+        CB --> |a>27| CBB(5<br>58%)"""
+    return dict(merm_chart=s)
 
 
 @psl_request
