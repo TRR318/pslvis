@@ -12,6 +12,7 @@ urlpatterns = [
 
         path('<subj_id>/', views.index, name='index'),
         path('<subj_id>/get', views.get, name='get-model'),
+        path('<subj_id>/tree', views.gettree, name='get-model'),
         path('<subj_id>/update-table', views.update_table, name='update-table'),
         path('<subj_id>/reset', views.reset, name='reset'),
         path('<subj_id>/add', views.add, name='add'),
