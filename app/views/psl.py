@@ -1,6 +1,7 @@
 import inspect
 from functools import wraps
 
+import numpy as np
 from django.shortcuts import render
 
 from app.models import Subject, PslParam
@@ -20,7 +21,8 @@ def psl_request(func=None, *, target="pslresult.pug"):
             else:
                 pslparams = PslParam.objects.get(id=model_id)
 
-            kwargs_full = dict(subj=subj, pslparams=pslparams, request=request)
+            psl = fit_psl(subj.dataset, pslparams.features, pslparams.scores)
+            kwargs_full = dict(subj=subj, pslparams=pslparams, request=request, psl=psl)
 
             sig = inspect.signature(func)
             valid_params = set(sig.parameters.keys())
@@ -30,7 +32,7 @@ def psl_request(func=None, *, target="pslresult.pug"):
             return render(
                 request,
                 target,
-                fit_psl(subj.dataset, pslparams.features, pslparams.scores)
+                psl
                 | dict(historylength=subj.hist_len)
                 | (added_context or dict()),
             )
@@ -53,25 +55,30 @@ def index(subj: Subject):
 def get():
     pass
 
+
 @psl_request(target="model_as_tree.pug")
-def gettree():
-    s = """
-    flowchart TD
-        1(0) --> B(0)
-        1 --> |W>70| C(2)
-        B --> BA(0)
-        B --> |m| BB(1)
-        C --> CA(2)
-        C --> |m| CB(3)
-        BA --> BAA(0<br>3%)
-        BA --> |a>27| BAB(2<br>21%)
-        BB --> BBA(1<br>5%)
-        BB --> |a>27| BBB(3<br>23%)
-        CA --> CAA(2<br>21%)
-        CA --> |a>27| CAB(4<br>23%)
-        CB --> CBA(3<br>23%)
-        CB --> |a>27| CBB(5<br>58%)"""
-    return dict(merm_chart=s)
+def gettree(psl):
+    names = [row["fname"]+row["thresh"] for row in psl["rows"]]
+    scores = np.array(psl["scores"])
+    probas = {int(h):p for h,p in zip(psl["headings"], psl["rows"][-1]["probas"])}
+    output = ["""---
+title: Hello Title
+config:
+  theme: base
+  themeVariables:
+    primaryColor: "#fff"
+---""","flowchart TD", "\t0(0)"]
+
+    for i, (name, score) in enumerate(zip(names, scores)):
+        for k, j in enumerate(range(2 ** i - 1, 2 ** (i + 1) - 1)):
+            for m in range(2):
+                binary_str = f"{k * 2 + m:0{i + 1}b}" + "0" * (len(scores) - i - 1)
+                s = np.array([int(x) for x in binary_str]) @ scores
+                p = f"<br/>{probas[s]}" if i == len(scores) - 1 else ""
+                label = f"|{name}| " if m == 1 else ""
+                output.append(f"\t{j} --> {label}{j * 2 + m + 1}({s}{p})")
+    result = "\n".join(output)
+    return dict(merm_chart=result)
 
 
 @psl_request
