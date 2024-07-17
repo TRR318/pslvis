@@ -13,9 +13,6 @@ html(lang='en')
     script(src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.11/dist/htmx.min.js")
     script(src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js")
   body
-    include tree.pug
-
-    script.
-      mermaid.initialize();
-      document.querySelectorAll(':has(pre.mermaid)')
-      .forEach(cell => {cell.classList.remove('d-none');})
+    .container.mt-5
+      .row
+          include tree.pug
