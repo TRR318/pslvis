@@ -38,7 +38,8 @@ html(lang='en')
         .col-sm-6.col-lg-4
           h4 Interactive PSL
           p Merkmale können durch verschieben Merkmale zum Modell hinzufügen und die Reihenfolge ändern.
-          p Die Grafik in der rechten oberen Ecke visualisiert die Performance des erstellten Modells.
+          if experiment_params.incremental_model == 1
+            p Die Grafik in der rechten oberen Ecke visualisiert die Performance des erstellten Modells.
         .col-sm-6.offset-lg-4.col-lg-4
           canvas#chart(height="220px")
     #model-container.container.mt-4
