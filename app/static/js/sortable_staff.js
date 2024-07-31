@@ -26,7 +26,7 @@ export function sortableStaff() {
           ghostClass: "ghost",
           handle: ".draghandle",
           onMove: function(evt) {
-            if (evt.from.id == "unused" && evt.to.id === "used" && evt.to.children.length > 3) {
+            if (evt.from.id == "unused" && evt.to.id === "used" && evt.to.children.length > experiment_params.max_model_size) {
               return false;
             }
           },

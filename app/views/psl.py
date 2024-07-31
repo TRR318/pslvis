@@ -28,12 +28,14 @@ def psl_request(func=None, *, target="pslresult.pug"):
             filtered_kwargs = {key: value for key, value in kwargs_full.items() if key in valid_params}
 
             added_context = func(**filtered_kwargs)
+
             return render(
                 request,
                 target,
                 fit_psl(subj.dataset, pslparams.features, pslparams.scores)
                 | dict(historylength=subj.hist_len)
-                | (added_context or dict()),
+                | (added_context or dict())
+                | dict(experiment_params=subj.experiment.params)
             )
 
         return wrapper
@@ -64,7 +66,7 @@ def gettree(subj, pslparams):
     probas = {int(h):p for h,p in zip(psl["headings"], psl["rows"][-1]["probas"])}
     output = ["""
     ---
-title: Hello Title
+title:
 config:
   theme: base
   themeVariables:
@@ -78,7 +80,7 @@ config:
                 s = np.array([int(x) for x in binary_str]) @ scores
                 p = f"<br/>{probas[s]}" if i == len(scores) - 1 else ""
                 label = f"|{name}| " if m == 1 else ""
-                output.append(f"\t{j} --> {label}{j * 2 + m + 1}({str(s).replace("-","–")}{p})")
+                output.append(f"\t{j} --> {label}{j * 2 + m + 1}({str(s).replace('-', '-')}{p})")
     result = "\n".join(output)
     return dict(merm_chart=result)
 
