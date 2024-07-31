@@ -39,7 +39,6 @@ html(lang='en')
           h4 Interactive PSL
           p Merkmale können durch verschieben Merkmale zum Modell hinzufügen und die Reihenfolge ändern.
           p Die Grafik in der rechten oberen Ecke visualisiert die Performance des erstellten Modells.
-          //- p Ziel ist ein Modell zu konstruieren das möglichst präzise einen Studienabbruch vorhersagen kann.
         .col-sm-6.offset-lg-4.col-lg-4
           canvas#chart(height="220px")
     #model-container.container.mt-4
@@ -67,41 +66,45 @@ html(lang='en')
       const remove = (event) => update_table(event, {type: "feature", fromList: "used", toList: "unused"});
       const score = (event, diff) => update_table(event, {type: "score", diff: diff});
       
-      //- const chart = new Chart(document.querySelector("#chart").getContext('2d'), {
-      //-   type: 'line',
-      //-   data: {
-      //-     labels: labels,
-      //-     datasets: [{
-      //-       label: 'RoC AuC pro Stufe',
-      //-       borderColor: 'rgb(75, 192, 192)',
-      //-       data: data,
-      //-     }],
-      //-   },
-      //-   options: {
-      //-     scales: {
-      //-       y: {
-      //-         beginAtZero: false,
-      //-         min: 0.5,   // Set the minimum value of the y-axis
-      //-         max: 1.02,   // Set the maximum value of the y-axis
-      //-         title: {
-      //-           display: true,
-      //-           text: 'Model Performance'  // Y-axis label
-      //-         }
-      //-       },
-      //-       x: {
-      //-         title: {
-      //-           display: true,
-      //-           text: 'Anzahl der Merkmale'  // X-axis label
-      //-         }
-      //-       }
-      //-     },
-      //-     animation: {
-      //-       duration: 0
-      //-     },
-      //-     responsive: true,
-      //-     maintainAspectRatio: false,
-      //-   }
-      //- });
+      const chart = new Chart(document.querySelector("#chart").getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'RoC AuC pro Stufe',
+            borderColor: 'rgb(75, 192, 192)',
+            data: data,
+          }],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 0.5,   // Set the minimum value of the y-axis
+              max: 1.02,   // Set the maximum value of the y-axis
+              title: {
+                display: true,
+                text: 'Model Performance'  // Y-axis label
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Anzahl der Merkmale'  // X-axis label
+              }
+            }
+          },
+          animation: {
+            duration: 0
+          },
+          responsive: true,
+          maintainAspectRatio: false,
+        }
+      });
+
+      if (experiment_params.incremental_model == 0){
+        document.getElementById("chart").style.display = "none";
+      }
 
       htmx.on('htmx:configRequest', e => e.detail.headers['X-CSRFToken'] = "!{csrf_token}");
 
