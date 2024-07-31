@@ -21,8 +21,7 @@ def psl_request(func=None, *, target="pslresult.pug"):
             else:
                 pslparams = PslParam.objects.get(id=model_id)
 
-            psl = fit_psl(subj.dataset, pslparams.features, pslparams.scores)
-            kwargs_full = dict(subj=subj, pslparams=pslparams, request=request, psl=psl)
+            kwargs_full = dict(subj=subj, pslparams=pslparams, request=request)
 
             sig = inspect.signature(func)
             valid_params = set(sig.parameters.keys())
@@ -32,7 +31,7 @@ def psl_request(func=None, *, target="pslresult.pug"):
             return render(
                 request,
                 target,
-                psl
+                fit_psl(subj.dataset, pslparams.features, pslparams.scores)
                 | dict(historylength=subj.hist_len)
                 | (added_context or dict()),
             )
@@ -57,7 +56,9 @@ def get():
 
 
 @psl_request(target="model_as_tree.pug")
-def gettree(psl):
+def gettree(subj, pslparams):
+    psl = fit_psl(subj.dataset, pslparams.features, pslparams.scores)
+
     names = [row["fname"]+row["thresh"] for row in psl["rows"]]
     scores = np.array(psl["scores"])
     probas = {int(h):p for h,p in zip(psl["headings"], psl["rows"][-1]["probas"])}

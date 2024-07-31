@@ -36,7 +36,7 @@
           .label.col.col-9.p-2.text-truncate.draghandle.hand-cursor.position-relative(data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=row["fname"]+row["thresh"])= row.fname
             if row.thresh != ""
               = row.thresh
-            span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "used", "toList": "unused"}' hx-indicator="#spinner")r
+            span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "used", "toList": "unused"}' hx-indicator="#spinner")
           .col.col-3.border-start.p-2.text-truncate.d-flex.justify-content-around.align-items-center(hx-vals='{"type":"score"}')
             span.mdi.mdi-minus.btn.btn-sm.p-0(hx-post="update-table" hx-vals='{"diff":-1}')
             = row.score
