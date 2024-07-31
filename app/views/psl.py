@@ -80,7 +80,7 @@ config:
                 s = np.array([int(x) for x in binary_str]) @ scores
                 p = f"<br/>{probas[s]}" if i == len(scores) - 1 else ""
                 label = f"|{name}| " if m == 1 else ""
-                output.append(f"\t{j} --> {label}{j * 2 + m + 1}({str(s).replace('-', '-')}{p})")
+                output.append(f"\t{j} --> {label}{j * 2 + m + 1}({str(s).replace('-', '–')}{p})")
     result = "\n".join(output)
     return dict(merm_chart=result)
 
