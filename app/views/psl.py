@@ -61,13 +61,14 @@ def gettree(psl):
     names = [row["fname"]+row["thresh"] for row in psl["rows"]]
     scores = np.array(psl["scores"])
     probas = {int(h):p for h,p in zip(psl["headings"], psl["rows"][-1]["probas"])}
-    output = ["""---
+    output = ["""
+    ---
 title: Hello Title
 config:
   theme: base
   themeVariables:
     primaryColor: "#fff"
----""","flowchart TD", "\t0(0)"]
+---""", "flowchart TD", "\t0(0)"]
 
     for i, (name, score) in enumerate(zip(names, scores)):
         for k, j in enumerate(range(2 ** i - 1, 2 ** (i + 1) - 1)):
@@ -76,7 +77,7 @@ config:
                 s = np.array([int(x) for x in binary_str]) @ scores
                 p = f"<br/>{probas[s]}" if i == len(scores) - 1 else ""
                 label = f"|{name}| " if m == 1 else ""
-                output.append(f"\t{j} --> {label}{j * 2 + m + 1}({s}{p})")
+                output.append(f"\t{j} --> {label}{j * 2 + m + 1}({str(s).replace("-","–")}{p})")
     result = "\n".join(output)
     return dict(merm_chart=result)
 
