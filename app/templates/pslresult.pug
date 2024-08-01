@@ -19,17 +19,17 @@
       span#accuracy.fw-bold
 
 #feature-container.row.mt-3.loading(hx-target="#model-container")
-  .col-2
+  .col-3
     ul#unused.list-group.text-center
       .fw-bold.list-group-item.p-2 Unbenutzt
       each fidx, f in var.items
         li.list-group-item.list-group-item-action.p-2.text-truncate.draghandle.hand-cursor(data-feature=fidx data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=f hx-vals='js:{"feature": event.target.closest("li").dataset.feature}')= f
           span.mdi.mdi-plus.btn.btn-sm.p-0.position-absolute.end-0.add.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "unused", "toList": "used"}')
   if experiment_params.incremental_model == 1
-    .col-10
+    .col-9
       ul#used.list-group.text-center
         .fw-bold.list-group-item.d-flex.p-0
-          .col-3.p-2.text-truncate Merkmal
+          .col-4.p-2.text-truncate Merkmal
           .col-1.border-start.p-2.text-truncate Score
           for head in headings
             .col.border-start.p-2.text-truncate= head
@@ -37,7 +37,7 @@
           li.list-group-item.list-group-item-action.d-flex.p-0(data-feature=row["fidx"] data-threshold=row["thresh"] hx-vals='js:{"feature": event.target.closest("li").dataset.feature}')
             // we could also add additional data into the datafield. such as the threshold
             span.badge.rounded-pill.text-bg-light.position-absolute.top-50.start-0.translate-middle= row.i
-            .label.col.col-3.p-2.text-truncate.draghandle.hand-cursor.position-relative(data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=row["fname"]+row["thresh"])= row.fname
+            .label.col.col-4.p-2.text-truncate.draghandle.hand-cursor.position-relative(data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=row["fname"]+row["thresh"])= row.fname
               if row.thresh != ""
                 = row.thresh
               span.mdi.mdi-close.btn.btn-sm.p-0.position-absolute.end-0.remove.d-none(hx-post="update-table" hx-vals='{"type": "feature", "fromList": "used", "toList": "unused"}' hx-indicator="#spinner")
@@ -48,7 +48,7 @@
             each val in row.probas
               .col.border-start.pt-2.pb-2.text-truncate.proba-cell= val
   if experiment_params.incremental_model == 0
-    .col-5
+    .col-4
       ul#used.list-group.text-center
         .fw-bold.list-group-item.d-flex.p-0
           .col-9.p-2.text-truncate Merkmal
