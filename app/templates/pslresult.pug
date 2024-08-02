@@ -95,7 +95,7 @@ script.
 
   if (experiment_params.incremental_model == 0) {
     lastStagePerformance = data[data.length - 1]
-    document.querySelector("#accuracy").innerHTML = "&nbsp;" + ((lastStagePerformance-.5) * 40).toFixed(0) + " von 20";
+    document.querySelector("#accuracy").innerHTML = "&nbsp;" + ((lastStagePerformance-.5) * 40).toFixed(0) + " von 20 Punkten";
 
     document.querySelectorAll("#used li:last-child .proba-cell").forEach(cell => {
       cell.classList.remove("d-none");
