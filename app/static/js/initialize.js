@@ -19,6 +19,8 @@ function initialize() {
   sortableStaff();
 
   heatmap();
+
+  mermaid.run();
 }
 
 document.addEventListener('DOMContentLoaded', initialize);

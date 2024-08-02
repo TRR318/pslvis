@@ -83,6 +83,11 @@
             .col.p-2.text-truncate.border-start.total-score-heading= head
         #lastprobas.d-flex.list-group-item.p-0
 
+if experiment_params.incremental_model == 0
+  .row.text-center
+    pre.mermaid
+      != merm_chart|safe
+
 script.
   labels = !{labels};
   data = !{metric};
