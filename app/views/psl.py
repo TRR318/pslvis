@@ -67,6 +67,8 @@ def gettree():
 
 def compute_tree(psl):
     names = [row["fname"] + row["thresh"] for row in psl["rows"]]
+    if not names:
+        return dict(merm_chart_proba="flowchart TD", merm_chart="flowchart TD")
     scores = np.array(psl["scores"])
     probas = {int(h): p for h, p in zip(psl["headings"], psl["rows"][-1]["probas"])}
 
