@@ -30,15 +30,15 @@ html(lang='en')
                 span.mdi.mdi-github.fs-4.btn.btn-sm
                 span Visualization
 
-    #models.offcanvas.offcanvas-end(tabindex="-1")
+    //#models.offcanvas.offcanvas-end(tabindex="-1")
       include models.pug
 
     .container.mt-5
       .row
         .col-sm-6.col-lg-4
           h4 Interactive PSL
-          p Merkmale können durch verschieben Merkmale zum Modell hinzufügen und die Reihenfolge ändern.
           if experiment_params.incremental_model == 1
+            p Merkmale können durch verschieben zum Modell hinzufügen und die Reihenfolge ändern.
             p Die Grafik in der rechten oberen Ecke visualisiert die Performance des erstellten Modells.
         .col-sm-6.offset-lg-4.col-lg-4
           canvas#chart(height="220px")

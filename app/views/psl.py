@@ -1,5 +1,6 @@
 import inspect
 from functools import wraps
+from html import escape
 
 import numpy as np
 from django.shortcuts import render
@@ -61,9 +62,9 @@ def get():
 def gettree(subj, pslparams):
     psl = fit_psl(subj.dataset, pslparams.features, pslparams.scores)
 
-    names = [row["fname"]+row["thresh"] for row in psl["rows"]]
+    names = [row["fname"] + row["thresh"] for row in psl["rows"]]
     scores = np.array(psl["scores"])
-    probas = {int(h):p for h,p in zip(psl["headings"], psl["rows"][-1]["probas"])}
+    probas = {int(h): p for h, p in zip(psl["headings"], psl["rows"][-1]["probas"])}
     output = ["""
     ---
 title:
@@ -79,8 +80,8 @@ config:
                 binary_str = f"{k * 2 + m:0{i + 1}b}" + "0" * (len(scores) - i - 1)
                 s = np.array([int(x) for x in binary_str]) @ scores
                 p = f"<br/>{probas[s]}" if i == len(scores) - 1 else ""
-                label = f"|{name}| " if m == 1 else ""
-                output.append(f"\t{j} --> {label}{j * 2 + m + 1}({str(s).replace('-', '–')}{p})")
+                label = f'|"{name}"| ' if m == 1 else ""
+                output.append(f'\t{j} --> {escape(label)}{j * 2 + m + 1}("{s}{p}")')
     result = "\n".join(output)
     return dict(merm_chart=result)
 
