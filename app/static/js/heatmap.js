@@ -3,7 +3,7 @@ export function heatmap() {
         let minColor, maxColor;
         if (experiment_params.red_heatmap == 0) {
             minColor = [230, 255, 230]; // Bright green
-            maxColor = [0, 255, 0];     // Dark green
+            maxColor = [8, 188, 8];     // Dark green
         } else {
             minColor = [255, 230, 230]; // Bright red
             maxColor = [255, 0, 0];     // Dark red
