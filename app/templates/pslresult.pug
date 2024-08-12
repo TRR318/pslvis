@@ -10,7 +10,7 @@
   .col-4.justify-content-center
     if experiment_params.automatically_add == 1
       .btn-group(role="group")
-        #add.btn.btn-outline-secondary.rounded-start-2(hx-post="add" hx-target="#model-container" hx-indicator="#spinner" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add one optimal feature") Automatisch hinzufügen
+        button#add.btn.btn-outline-secondary.rounded-start-2(hx-post="add" hx-target="#model-container" hx-indicator="#spinner" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add one optimal feature") Automatisch hinzufügen
           span.mdi.mdi-chevron-right
       //#fill.btn.btn-outline-secondary(hx-post="fill" hx-target="#model-container" hx-indicator="#spinner") Fill
         span.mdi.mdi-page-last
@@ -114,6 +114,16 @@ script.
       document.querySelector(".total-score-heading").classList.remove("border-start");
       document.querySelector(".proba-cell").classList.remove("border-start");
     }
+  }
+
+  //- Disabling the Automatically Add button if feature limit is reached
+  if (document.querySelectorAll("#used li").length == 5) {
+    const button = document.querySelector('#add.btn');
+    if (button) {
+        // Add the Bootstrap 'disabled' class to the button and the parent div
+        button.classList.add('disabled');
+        button.setAttribute('disabled', 'disabled'); // Ensures the button is functionally disabled
+      }
   }
 
 style.
