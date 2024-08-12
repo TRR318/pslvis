@@ -37,7 +37,8 @@ html(lang='en')
     .container.mt-5
       .row
         .col-sm-6.col-lg-4
-          h4 Interactive PSL
+          h4= experiment_params.title_text
+          p= experiment_params.data_description
           if experiment_params.incremental_model == 1
             p Merkmale können durch verschieben zum Modell hinzufügen und die Reihenfolge ändern.
             p Die Grafik in der rechten oberen Ecke visualisiert die Performance des erstellten Modells.
