@@ -40,8 +40,9 @@ html(lang='en')
           h4= experiment_params.title_text
           p= experiment_params.data_description
           if experiment_params.incremental_model == 1
-            p Merkmale können durch verschieben zum Modell hinzufügen und die Reihenfolge ändern.
-            p Die Grafik in der rechten oberen Ecke visualisiert die Performance des erstellten Modells.
+            p Merkmale können durch Verschieben zum Modell hinzugefügt und die Reihenfolge geändert werden. 
+            p Scores von hinzugefügten Merkmalen können durch Klicken auf die Plus- und Minus-Buttons geändert werden. 
+            p Die Grafik in der rechten oberen Ecke visualisiert die Performance (je mehr desto besser) des erstellten Modells.
         .col-sm-6.offset-lg-4.col-lg-4
           canvas#chart(height="220px")
     #model-container.container.mt-4
