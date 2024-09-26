@@ -13,6 +13,7 @@ html(lang='en')
     script(src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.11/dist/htmx.min.js")
     script(src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js")
     script(src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js")
   body
     if standalone
       header.navbar.navbar-expand-lg.sticky-top.bg-success-subtle
@@ -30,16 +31,18 @@ html(lang='en')
                 span.mdi.mdi-github.fs-4.btn.btn-sm
                 span Visualization
 
-    #models.offcanvas.offcanvas-end(tabindex="-1")
+    //#models.offcanvas.offcanvas-end(tabindex="-1")
       include models.pug
 
     .container.mt-5
       .row
         .col-sm-6.col-lg-4
-          h4 Interactive PSL
-          p Merkmale können durch verschieben Merkmale zum Modell hinzufügen und die Reihenfolge ändern.
-          p Die Grafik in der rechten oberen Ecke visualisiert die Performance des erstellten Modells.
-          //- p Ziel ist ein Modell zu konstruieren das möglichst präzise einen Studienabbruch vorhersagen kann.
+          h4= experiment_params.title_text
+          p= experiment_params.data_description
+          if experiment_params.incremental_model == 1
+            p Merkmale können durch Verschieben zum Modell hinzugefügt und die Reihenfolge geändert werden. 
+            p Scores von hinzugefügten Merkmalen können durch Klicken auf die Plus- und Minus-Buttons geändert werden. 
+            p Die Grafik in der rechten oberen Ecke visualisiert die Performance (je mehr desto besser) des erstellten Modells.
         .col-sm-6.offset-lg-4.col-lg-4
           canvas#chart(height="220px")
     #model-container.container.mt-4
@@ -102,6 +105,10 @@ html(lang='en')
           maintainAspectRatio: false,
         }
       });
+
+      if (experiment_params.incremental_model == 0){
+        document.getElementById("chart").style.display = "none";
+      }
 
       htmx.on('htmx:configRequest', e => e.detail.headers['X-CSRFToken'] = "!{csrf_token}");
 

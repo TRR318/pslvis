@@ -12,7 +12,7 @@ class RequestLoggingMiddleware:
 
         # Extract subject id from URL using Django's resolver
         resolver_match = resolve(request.path)
-        subject_id = resolver_match.kwargs.get('subject')
+        subject_id = resolver_match.kwargs.get('subj_id')
 
         if subject_id is not None:
             try:

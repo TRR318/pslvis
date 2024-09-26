@@ -21,10 +21,15 @@ export function sortableStaff() {
     document.querySelectorAll("#feature-container ul")
       .forEach(ul => {
         new Sortable(ul, {
-          animation:150,
+          animation: 150,
           group: "features",
           ghostClass: "ghost",
           handle: ".draghandle",
+          onMove: function(evt) {
+            if (evt.from.id == "unused" && evt.to.id === "used" && evt.to.children.length > experiment_params.max_model_size) {
+              return false;
+            }
+          },
           onEnd: function(evt) {
             if (evt.oldIndex !== evt.newIndex || evt.from.id !== evt.to.id) {
               // Trigger htmx to send information to the server

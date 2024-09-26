@@ -41,4 +41,7 @@ html(lang='en')
         display: inline-block !important;
       }
 
-    script(type="module" src="{% static 'js/initialize.js' %}")
+  script.
+    experiment_params = !{experiment_params|safe};  
+
+  script(type="module" src="{% static 'js/initialize.js' %}")

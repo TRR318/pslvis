@@ -1,7 +1,13 @@
 export function heatmap() {
     function getHeatmapColor(value) {
-        const minColor = [255, 230, 230]; // Bright red
-        const maxColor = [255, 0, 0];     // Dark red
+        let minColor, maxColor;
+        if (experiment_params.red_heatmap == 0) {
+            minColor = [230, 255, 230]; // Bright green
+            maxColor = [8, 188, 8];     // Dark green
+        } else {
+            minColor = [255, 230, 230]; // Bright red
+            maxColor = [255, 0, 0];     // Dark red
+        }
 
         // Convert percentage string to a number
         const numValue = parseFloat(value.replace('%', ''));
